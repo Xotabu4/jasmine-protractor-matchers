@@ -74,5 +74,7 @@ more will be added each 10 stars :)
 Used documentation
 ------------------
 http://jasmine.github.io/edge/custom_matcher.html
+
 https://angular.github.io/protractor/#/api?view=webdriver.WebDriver.prototype.wait
+
 https://angular.github.io/protractor/#/api?view=ExpectedConditions
