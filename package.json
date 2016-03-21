@@ -1,10 +1,10 @@
 {
   "name": "jasmine-protractor-matchers",
-  "version": "0.0.1",
+  "version": "0.1",
   "description": "Collection of additional jasmine matchers, that is useful for those who develop e2e tests using protractor",
   "main": "index.js",
   "scripts": {
-    "test": "npm test"
+    "test": "node test.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +20,8 @@
   "bugs": {
     "url": "https://github.com/Xotabu4/jasmine-protractor-matchers/issues"
   },
-  "homepage": "https://github.com/Xotabu4/jasmine-protractor-matchers#readme"
+  "homepage": "https://github.com/Xotabu4/jasmine-protractor-matchers#readme",
+  "devDependencies": {
+    "jasmine": "2.4.1"
+  }
 }

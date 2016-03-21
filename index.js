@@ -1,7 +1,7 @@
 "use strict";
 
 //noinspection JSCommentMatchesSignature,JSValidateJSDoc
-var customMatchers = {
+module.exports = {
     /**
      * Comparator that waits until element would be visible.
      * It is useful for situations when some element dynamic, and appear after little delay.
@@ -15,10 +15,16 @@ var customMatchers = {
     toAppear: function(){
         return {
             compare: function(actual){
-                let timeout = arguments[1] || 3000;
-                let message = arguments[2];
+                let message, timeout;
+                if (typeof arguments[1] === 'string') {
+                    timeout = 3000;
+                    message = arguments[1]
+                } else {
+                    timeout = arguments[1] || 3000;
+                    message = arguments[2];
+                }
                 let result = {};
-                result.pass = actual.ptor_.wait(EC.visibilityOf(actual), timeout).then(()=>{
+                result.pass = actual.ptor_.wait(protractor.ExpectedConditions.visibilityOf(actual), timeout).then(()=>{
                     result.message = message || "Element "+ actual.parentElementArrayFinder.locator_.toString() +
                         " was expected NOT to be shown in " + timeout + " milliseconds but is visible";
                     return true;
@@ -37,10 +43,16 @@ var customMatchers = {
     toDisappear: function(){
         return {
             compare: function(actual){
-                let timeout = arguments[1] || 3000;
-                let message = arguments[2];
+                let message, timeout;
+                if (typeof arguments[1] === 'string') {
+                    timeout = 3000;
+                    message = arguments[1]
+                } else {
+                    timeout = arguments[1] || 3000;
+                    message = arguments[2];
+                }
                 let result = {};
-                result.pass = actual.ptor_.wait(EC.invisibilityOf(actual), timeout).then(()=>{
+                result.pass = actual.ptor_.wait(protractor.ExpectedConditions.invisibilityOf(actual), timeout).then(()=>{
                     result.message = message || "Element "+ actual.parentElementArrayFinder.locator_.toString() +
                         " was expected to be shown in " + timeout + " milliseconds but is NOT visible";
                     return true;
@@ -54,5 +66,3 @@ var customMatchers = {
         }
     }
 };
-
-module.exports = customMatchers;
