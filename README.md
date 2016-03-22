@@ -1,7 +1,7 @@
 JasmineJS matchers for ProtractorJS
 ===================================
 
-This module adds some matchers that will be useful for those who develop test cases with ProtractorJS
+This module adds some matchers that can be useful for those who develop test cases with ProtractorJS
 
 
 Installing
@@ -13,7 +13,7 @@ npm install jasmine-protractor-matchers --save-dev
 
 Importing and enabling
 ---------------------
-I prefer to add matchers in beforeAll function, that i put into onPrepare:
+I prefer to add matchers in beforeAll function, that I put into onPrepare:
 
 In your protractor.config.js:
 ```javascript
@@ -42,7 +42,7 @@ describe('Some test suite', function () {
 
 Usage
 -----
-Usage is pretty simple, since no any rocket science under hood. After matchers are added to jasmine, you will have new functions to use:
+Usage is pretty simple, since no any rocket science under hood. After matchers are added to jasmine, you have new functions to use:
 
 ```javascript
 it('test 1', function () {
