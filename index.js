@@ -3,12 +3,12 @@
 //noinspection JSCommentMatchesSignature,JSValidateJSDoc
 module.exports = {
     /**
-     * Comparator that waits until element would be visible.
-     * It is useful for situations when some element dynamic, and appear after little delay.
+     * Comparator that waits until element is visible.
+     * It is useful for situations when some element is dynamic and appears after some delay.
      *
-     * @param actual - element that will be waited to be visible. Should be ElementFinder object.
-     * @param timeout - second param. Optional. Time in milliseconds to wait for element appear.
-     * @param message - third param. Optional. Message, that will override default error message.
+     * @param actual - element that is expected to be visible. Should be ElementFinder object.
+     * @param timeout - second param. Optional. Time in milliseconds to wait for element to appear.
+     * @param message - third param. Optional. Message that overrides default error message.
      *
      * @returns {{compare: compare}} comparator function according to Jasmine matchers specification.
      */
@@ -38,7 +38,7 @@ module.exports = {
         }
     },
     /**
-     * Oposite matcher to toAppear() . Could be used for element disappearing.
+     * Opposite matcher to toAppear() . Can be used for element disappearing checks.
      */
     toDisappear: function(){
         return {
