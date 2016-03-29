@@ -30,15 +30,15 @@ class Element {
     constructor() {
         this.parentElementArrayFinder = {locator_: 'test locator'};
         this.ptor_ =  new protractorMock();
+        this.displayed = true;
     }
-    isDisplayed() {return true}
+    isDisplayed() {return this.displayed}
 }
 
 global.protractor = new protractorMock();
 
 describe('Additional matchers: ', function () {
     describe('toAppear:', function () {
-
         let toAppear = matchers.toAppear().compare;
 
         it('should return result object with Promise pass, that resolves to true', function (done) {
@@ -93,6 +93,20 @@ describe('Additional matchers: ', function () {
                 done();
             });
         });
+
+        it('should reject result.pass if wait was failed', function (done) {
+            var element = new Element();
+            element.displayed = false;
+            element.ptor_.wait = function(EC) {
+                return Promise.reject();
+            };
+
+            let res = toAppear(element);
+            res.pass.then(success=> fail(),error=> {
+                expect(error.message).toBe('Element test locator was expected to be shown in 3000 milliseconds but is NOT visible');
+                done();
+            });
+        })
 
     });
 
@@ -151,6 +165,20 @@ describe('Additional matchers: ', function () {
                 done();
             });
         });
+
+        it('should reject result.pass if wait was failed', function (done) {
+            var element = new Element();
+            element.displayed = false;
+            element.ptor_.wait = function(EC) {
+                return Promise.reject();
+            };
+
+            let res = toDisappear(element);
+            res.pass.then(success=> fail(),error=> {
+                expect(error.message).toBe('Element test locator was expected NOT to be shown in 3000 milliseconds but is visible');
+                done();
+            });
+        })
 
     });
 });
