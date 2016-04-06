@@ -92,7 +92,7 @@ module.exports = {
                     });
 
                 };
-                result.pass = protractor.wait(waitForEqual, timeout).then( ()=> {
+                result.pass = browser.wait(waitForEqual, timeout).then( ()=> {
                    // result.message = message || defaultMsg;
                     return true;
                 }, err => {
