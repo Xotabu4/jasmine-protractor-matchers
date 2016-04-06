@@ -79,7 +79,7 @@ module.exports = {
                 let result = {};
 
                 let waitForEqual = () => {
-                    return protractor.promise.all([actual, expected]).then( (results) => {
+                    return Promise.all([actual, expected]).then( (results) => {
                        let comparison = results[0] === results[1];
                        if (comparison) {
                            result.message = message || "Value " + results[0] +
