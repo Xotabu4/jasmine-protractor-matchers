@@ -64,5 +64,43 @@ module.exports = {
                 return result;
             }
         }
+    },
+    toEqualWithDelay: function() {
+        return {
+            compare: function (actual, expected) {
+                let message, timeout;
+                if (typeof arguments[2] === 'string') {
+                    timeout = 3000;
+                    message = arguments[2]
+                } else {
+                    timeout = arguments[2] || 3000;
+                    message = arguments[3];
+                }
+                let result = {};
+
+                let waitForEqual = () => {
+                    return protractor.promise.all([actual, expected]).then( (results) => {
+                       let comparison = results[0] === results[1];
+                       if (comparison) {
+                           result.message = message || "Value " + results[0] +
+                               " was expected NOT to equal " + results[1] + " within " + timeout + " milliseconds but still is"
+                       } else {
+                           result.message = message || "Value " + results[0] +
+                           " was expected to equal " + results[1] + " within " + timeout + " milliseconds but is NOT";
+                       }
+                        return comparison;
+                    });
+
+                };
+                result.pass = protractor.wait(waitForEqual, timeout).then( ()=> {
+                   // result.message = message || defaultMsg;
+                    return true;
+                }, err => {
+                   // let msg = message || defaultMsg;
+                    throw new Error(result.message);
+                });
+                return result;
+            }
+        }
     }
 };

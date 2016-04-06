@@ -26,6 +26,16 @@ class protractorMock {
     }
 }
 
+class protractorMockFail {
+    constructor() {
+        this.ExpectedConditions = new ExpectedConditions();
+    }
+
+    wait(EC, timeout) {
+        return Promise.reject(EC);
+    }
+}
+
 class Element {
     constructor() {
         this.parentElementArrayFinder = {locator_: 'test locator'};
@@ -181,6 +191,57 @@ describe('Additional matchers: ', function () {
         })
 
     });
+    describe('toEqualWithDelay:', function () {
+
+        let toEqualWithDelay = matchers.toEqualWithDelay().compare;
+
+        it('should return result object with Promise pass, that resolves to true', function (done) {
+            var actual = 1;
+            var expected = 1;
+            let result = toEqualWithDelay(actual, expected);
+
+            result.pass.then(pass => {
+                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
+                done();
+            });
+        });
+
+        it('should return result object with default message, if not specified', function (done) {
+            var actual = 1;
+            var expected = 1;
+            let result = toEqualWithDelay(Promise.resolve(actual), Promise.resolve(expected));
+
+            result.pass.then(() => {
+                expect(result.message).toBe("Value "+ actual +
+                    " was expected NOT to equal " + expected + " within " + 3000 + " milliseconds but still is");
+                done();
+            });
+        });
+
+        it('should be able to return message object with non-default message and timeout.', function (done) {
+            var actual = 1;
+            var expected = 1;
+
+            let result = toEqualWithDelay(Promise.resolve(actual), Promise.resolve(expected), 1000, 'test message');
+
+            result.pass.then(() => {
+                expect(result.message).toBe('test message');
+                done();
+            });
+        });
+        
+        it('should reject result.pass if wait was failed', function (done) {
+            var actual = 1;
+            var expected = 2;
+            global.protractor = new protractorMockFail();
+            let res = toEqualWithDelay(Promise.resolve(actual), Promise.resolve(expected));
+            res.pass.then(success => fail(), error=> {
+                expect(error.message).toBe("Value " + actual +
+                    " was expected to equal " + expected + " within " + 3000 + " milliseconds but is NOT");
+                done();
+            });
+        })
+    })
 });
 
 jasmine.execute(['test.js']);
