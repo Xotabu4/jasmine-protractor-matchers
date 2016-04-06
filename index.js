@@ -81,6 +81,8 @@ module.exports = {
                 let waitForEqual = () => {
                     return Promise.all([actual, expected]).then( (results) => {
                        let comparison = results[0] === results[1];
+                        console.log("the results after promise deferring are: ", results);
+                        console.log("Comparison is ", comparison);
                        if (comparison) {
                            result.message = message || "Value " + results[0] +
                                " was expected NOT to equal " + results[1] + " within " + timeout + " milliseconds but still is"
@@ -93,9 +95,11 @@ module.exports = {
 
                 };
                 result.pass = browser.wait(waitForEqual, timeout).then( ()=> {
+                    console.log("Expected toEqualWithDelay to PASS");
                    // result.message = message || defaultMsg;
                     return true;
                 }, err => {
+                    console.log("Expected toEqualWithDelay to FAIL");
                    // let msg = message || defaultMsg;
                     throw new Error(result.message);
                 });
