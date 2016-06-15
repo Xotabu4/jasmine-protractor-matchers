@@ -29,9 +29,9 @@ module.exports = {
                         " was expected NOT to be shown in " + timeout + " milliseconds but is visible";
                     return true;
                 }, err => {
-                    let msg = message || "Element " + actual.parentElementArrayFinder.locator_.toString() +
+                    result.message = message || "Element " + actual.parentElementArrayFinder.locator_.toString() +
                         " was expected to be shown in " + timeout + " milliseconds but is NOT visible";
-                    throw new Error(msg);
+                    return false;
                 });
                 return result;
             }
@@ -57,9 +57,9 @@ module.exports = {
                         " was expected to be shown in " + timeout + " milliseconds but is NOT visible";
                     return true;
                 }, err => {
-                    let msg = message || "Element " + actual.parentElementArrayFinder.locator_.toString() +
+                    result.message = message || "Element " + actual.parentElementArrayFinder.locator_.toString() +
                         " was expected NOT to be shown in " + timeout + " milliseconds but is visible";
-                    throw new Error(msg);
+                    return false;
                 });
                 return result;
             }

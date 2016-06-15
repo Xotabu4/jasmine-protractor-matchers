@@ -102,8 +102,9 @@ describe('Additional matchers: ', function () {
             };
 
             let res = toAppear(element);
-            res.pass.then(success=> fail(),error=> {
-                expect(error.message).toBe('Element test locator was expected to be shown in 3000 milliseconds but is NOT visible');
+            res.pass.then(result=> {
+                expect(result).toBe(false);
+                expect(res.message).toBe('Element test locator was expected to be shown in 3000 milliseconds but is NOT visible');
                 done();
             });
         })
@@ -174,8 +175,9 @@ describe('Additional matchers: ', function () {
             };
 
             let res = toDisappear(element);
-            res.pass.then(success=> fail(),error=> {
-                expect(error.message).toBe('Element test locator was expected NOT to be shown in 3000 milliseconds but is visible');
+            res.pass.then(result=> {
+                expect(result).toBe(false);
+                expect(res.message).toBe('Element test locator was expected NOT to be shown in 3000 milliseconds but is visible');
                 done();
             });
         })
