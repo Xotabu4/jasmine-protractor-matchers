@@ -107,7 +107,19 @@ describe('Additional matchers: ', function () {
                 expect(res.message).toBe('Element test locator was expected to be shown in 3000 milliseconds but is NOT visible');
                 done();
             });
-        })
+        });
+
+        it('should throw error when non-element is passed', function (done) {
+            var element = {};
+            try {
+                let res = toAppear(element);
+            }
+            catch (e) {
+                expect(e.message)
+                    .toBe('toAppear() expects to be applied to ElementFinder object, please make sure that you pass correct object');
+                done();
+            }
+        });
 
     });
 
@@ -180,7 +192,19 @@ describe('Additional matchers: ', function () {
                 expect(res.message).toBe('Element test locator was expected NOT to be shown in 3000 milliseconds but is visible');
                 done();
             });
-        })
+        });
+
+        it('should throw error when non-element is passed', function (done) {
+            var element = {};
+            try {
+                let res = toDisappear(element);
+            }
+            catch (e) {
+                expect(e.message)
+                    .toBe('toDisappear() expects to be applied to ElementFinder object, please make sure that you pass correct object');
+                done();
+            }
+        });
 
     });
 });
