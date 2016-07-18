@@ -25,6 +25,7 @@ module.exports = {
                 }
                 
                 if (actual.ptor_ == undefined) {
+                    //TODO: #6
                     throw new Error('toAppear() expects to be applied to ElementFinder object, ' +
                         'please make sure that you pass correct object');
                 }
@@ -56,6 +57,13 @@ module.exports = {
                     timeout = arguments[1] || 3000;
                     message = arguments[2];
                 }
+
+                if (actual.ptor_ == undefined) {
+                    //TODO: #6
+                    throw new Error('toDisappear() expects to be applied to ElementFinder object, ' +
+                        'please make sure that you pass correct object');
+                }
+
                 let result = {};
                 result.pass = actual.ptor_.wait(protractor.ExpectedConditions.invisibilityOf(actual), timeout).then(()=>{
                     result.message = message || "Element "+ actual.parentElementArrayFinder.locator_.toString() +
