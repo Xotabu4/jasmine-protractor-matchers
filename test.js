@@ -30,15 +30,15 @@ class Element {
     constructor() {
         this.parentElementArrayFinder = {locator_: 'test locator'};
         this.ptor_ =  new protractorMock();
+        this.displayed = true;
     }
-    isDisplayed() {return true}
+    isDisplayed() {return this.displayed}
 }
 
 global.protractor = new protractorMock();
 
 describe('Additional matchers: ', function () {
     describe('toAppear:', function () {
-
         let toAppear = matchers.toAppear().compare;
 
         it('should return result object with Promise pass, that resolves to true', function (done) {
@@ -90,6 +90,46 @@ describe('Additional matchers: ', function () {
 
             result.pass.then(() => {
                 expect(result.message).toBe('test message');
+                done();
+            });
+        });
+
+        it('should reject result.pass if wait was failed', function (done) {
+            var element = new Element();
+            element.displayed = false;
+            element.ptor_.wait = function(EC) {
+                return Promise.reject();
+            };
+
+            let res = toAppear(element);
+            res.pass.then(result=> {
+                expect(result).toBe(false);
+                expect(res.message).toBe('Element test locator was expected to be shown in 3000 milliseconds but is NOT visible');
+                done();
+            });
+        });
+
+        it('should throw error when non-element is passed', function (done) {
+            var element = {};
+            try {
+                let res = toAppear(element);
+            }
+            catch (e) {
+                expect(e.message)
+                    .toBe('toAppear() expects to be applied to ElementFinder object, please make sure that you pass correct object');
+                done();
+            }
+        });
+
+        it('should support protractor 4.0 .browser_ reference instead removed .ptor_', function () {
+            var element = new Element();
+            element.ptor_ = undefined;
+            element.browser_ = new protractorMock();
+
+            let result = toAppear(element);
+
+            result.pass.then(pass => {
+                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
                 done();
             });
         });
@@ -152,7 +192,48 @@ describe('Additional matchers: ', function () {
             });
         });
 
+        it('should reject result.pass if wait was failed', function (done) {
+            var element = new Element();
+            element.displayed = false;
+            element.ptor_.wait = function(EC) {
+                return Promise.reject();
+            };
+
+            let res = toDisappear(element);
+            res.pass.then(result=> {
+                expect(result).toBe(false);
+                expect(res.message).toBe('Element test locator was expected NOT to be shown in 3000 milliseconds but is visible');
+                done();
+            });
+        });
+
+        it('should throw error when non-element is passed', function (done) {
+            var element = {};
+            try {
+                let res = toDisappear(element);
+            }
+            catch (e) {
+                expect(e.message)
+                    .toBe('toDisappear() expects to be applied to ElementFinder object, please make sure that you pass correct object');
+                done();
+            }
+        });
+
+        it('should support protractor 4.0 .browser_ reference instead removed .ptor_', function () {
+            var element = new Element();
+            element.ptor_ = undefined;
+            element.browser_ = new protractorMock();
+
+            let result = toDisappear(element);
+
+            result.pass.then(pass => {
+                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
+                done();
+            });
+        });
+
     });
+    
 });
 
 jasmine.execute(['test.js']);
