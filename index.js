@@ -23,15 +23,28 @@ module.exports = {
                     timeout = arguments[1] || 3000;
                     message = arguments[2];
                 }
+                let internalBrowser;
+                if (actual.ptor_ == undefined) {
+                    // Protractor 4.0 renamed .ptor_ to .browser_ , adding backward compatibility
+                    if (actual.browser_ == undefined) {
+                        throw new Error('toAppear() expects to be applied to ElementFinder object, ' +
+                            'please make sure that you pass correct object');
+                    } else {
+                        internalBrowser = actual.browser_;
+                    }
+                } else {
+                    internalBrowser = actual.ptor_;
+                }
+
                 let result = {};
-                result.pass = actual.ptor_.wait(protractor.ExpectedConditions.visibilityOf(actual), timeout).then(()=>{
+                result.pass = internalBrowser.wait(protractor.ExpectedConditions.visibilityOf(actual), timeout).then(()=>{
                     result.message = message || "Element "+ actual.parentElementArrayFinder.locator_.toString() +
                         " was expected NOT to be shown in " + timeout + " milliseconds but is visible";
                     return true;
                 }, err => {
-                    let msg = message || "Element " + actual.parentElementArrayFinder.locator_.toString() +
+                    result.message = message || "Element " + actual.parentElementArrayFinder.locator_.toString() +
                         " was expected to be shown in " + timeout + " milliseconds but is NOT visible";
-                    throw new Error(msg);
+                    return false;
                 });
                 return result;
             }
@@ -51,15 +64,29 @@ module.exports = {
                     timeout = arguments[1] || 3000;
                     message = arguments[2];
                 }
+
+                let internalBrowser;
+                if (actual.ptor_ == undefined) {
+                    // Protractor 4.0 renamed .ptor_ to .browser_ , adding backward compatibility
+                    if (actual.browser_ == undefined) {
+                        throw new Error('toDisappear() expects to be applied to ElementFinder object, ' +
+                            'please make sure that you pass correct object');
+                    } else {
+                        internalBrowser = actual.browser_;
+                    }
+                } else {
+                    internalBrowser = actual.ptor_;
+                }
+
                 let result = {};
-                result.pass = actual.ptor_.wait(protractor.ExpectedConditions.invisibilityOf(actual), timeout).then(()=>{
+                result.pass = internalBrowser.wait(protractor.ExpectedConditions.invisibilityOf(actual), timeout).then(()=>{
                     result.message = message || "Element "+ actual.parentElementArrayFinder.locator_.toString() +
                         " was expected to be shown in " + timeout + " milliseconds but is NOT visible";
                     return true;
                 }, err => {
-                    let msg = message || "Element " + actual.parentElementArrayFinder.locator_.toString() +
+                    result.message = message || "Element " + actual.parentElementArrayFinder.locator_.toString() +
                         " was expected NOT to be shown in " + timeout + " milliseconds but is visible";
-                    throw new Error(msg);
+                    return false;
                 });
                 return result;
             }
