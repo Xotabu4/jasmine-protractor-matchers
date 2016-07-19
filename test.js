@@ -121,6 +121,19 @@ describe('Additional matchers: ', function () {
             }
         });
 
+        it('should support protractor 4.0 .browser_ reference instead removed .ptor_', function () {
+            var element = new Element();
+            element.ptor_ = undefined;
+            element.browser_ = new protractorMock();
+
+            let result = toAppear(element);
+
+            result.pass.then(pass => {
+                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
+                done();
+            });
+        });
+
     });
 
     describe('toDisappear:', function () {
@@ -204,6 +217,19 @@ describe('Additional matchers: ', function () {
                     .toBe('toDisappear() expects to be applied to ElementFinder object, please make sure that you pass correct object');
                 done();
             }
+        });
+
+        it('should support protractor 4.0 .browser_ reference instead removed .ptor_', function () {
+            var element = new Element();
+            element.ptor_ = undefined;
+            element.browser_ = new protractorMock();
+
+            let result = toDisappear(element);
+
+            result.pass.then(pass => {
+                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
+                done();
+            });
         });
 
     });
