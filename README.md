@@ -5,6 +5,18 @@ JasmineJS matchers for ProtractorJS
 
 This module adds some matchers that can be useful for those who develop test cases with ProtractorJS
 
+Supported versions
+---------------------
+Currently tested on 
+NodeJS:
+- 4.x
+- 5.x
+- 6.x
+
+ProtractorJS:
+- 3.x
+- 4.x
+
 
 Installing
 ---------------------
