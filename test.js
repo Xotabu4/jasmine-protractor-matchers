@@ -233,6 +233,7 @@ describe('Additional matchers: ', function () {
         });
 
     });
+    
 });
 
 jasmine.execute(['test.js']);
