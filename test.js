@@ -116,7 +116,7 @@ describe('Additional matchers: ', function () {
             }
             catch (e) {
                 expect(e.message)
-                    .toBe('Matcher expects to be applied to ElementFinder object, please make sure that you pass correct object type');
+                    .toBe('toAppear() expects to be applied to ElementFinder object, please make sure that you pass correct object');
                 done();
             }
         });
@@ -214,7 +214,7 @@ describe('Additional matchers: ', function () {
             }
             catch (e) {
                 expect(e.message)
-                    .toBe('Matcher expects to be applied to ElementFinder object, please make sure that you pass correct object type');
+                    .toBe('toDisappear() expects to be applied to ElementFinder object, please make sure that you pass correct object');
                 done();
             }
         });
