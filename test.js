@@ -7,6 +7,8 @@ var jasmine = new Jasmine();
 
 var matchers = require('./index.js');
 
+
+// Mock objects
 class ExpectedConditions {
     visibilityOf(elem) {
         return elem.isDisplayed();
@@ -37,9 +39,51 @@ class Element {
 
 global.protractor = new protractorMock();
 
+// End of mocks
+
 describe('Additional matchers: ', function () {
+    let toAppear = matchers.toAppear().compare;
+    let toDisappear = matchers.toDisappear().compare;
+
+    it('Should throw error on attempt to use on object without browser reference', function () {
+        var nonElement = {};
+        for (let matcher of [toAppear, toDisappear]) {
+            let wrapp = function () {
+                return matcher(nonElement);
+            };
+            expect(wrapp).toThrowError('Matcher expects to be applied to ElementFinder object, please make sure that you pass correct object type')
+        }
+    });
+
+    it('Should support both: Protractor 3.x .ptor_ and Protractor 4.x .browser_ attributes', function () {
+        var ptor4Element = new Element();
+        ptor4Element.ptor_ = undefined;
+        ptor4Element.browser_ = new protractorMock();
+        for (let matcher of [toAppear, toDisappear]) {
+            let wrapp = function () {
+                return matcher(ptor4Element);
+            };
+            expect(wrapp).not.toThrowError('Matcher expects to be applied to ElementFinder object, please make sure that you pass correct object type');
+            wrapp().pass.then(pass => {
+                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
+
+            });
+        }
+
+        var ptor3Element = new Element();
+        for (let matcher of [toAppear, toDisappear]) {
+            let wrapp = function () {
+                return matcher(ptor3Element);
+            };
+            expect(wrapp).not.toThrowError('Matcher expects to be applied to ElementFinder object, please make sure that you pass correct object type');
+            wrapp().pass.then(pass => {
+                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
+                done();
+            });
+        }
+    });
+
     describe('toAppear:', function () {
-        let toAppear = matchers.toAppear().compare;
 
         it('should return result object with Promise pass, that resolves to true', function (done) {
             var element = new Element();
@@ -109,35 +153,9 @@ describe('Additional matchers: ', function () {
             });
         });
 
-        it('should throw error when non-element is passed', function (done) {
-            var element = {};
-            try {
-                let res = toAppear(element);
-            }
-            catch (e) {
-                expect(e.message)
-                    .toBe('Matcher expects to be applied to ElementFinder object, please make sure that you pass correct object type');
-                done();
-            }
-        });
-
-        it('should support protractor 4.0 .browser_ reference instead removed .ptor_', function () {
-            var element = new Element();
-            element.ptor_ = undefined;
-            element.browser_ = new protractorMock();
-
-            let result = toAppear(element);
-
-            result.pass.then(pass => {
-                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
-                done();
-            });
-        });
-
     });
 
     describe('toDisappear:', function () {
-        let toDisappear = matchers.toDisappear().compare;
 
         it('should return result object with Promise pass, that resolves to true', function (done) {
             var element = new Element();
@@ -203,31 +221,6 @@ describe('Additional matchers: ', function () {
             res.pass.then(result=> {
                 expect(result).toBe(false);
                 expect(res.message).toBe('Element test locator was expected NOT to be shown in 3000 milliseconds but is visible');
-                done();
-            });
-        });
-
-        it('should throw error when non-element is passed', function (done) {
-            var element = {};
-            try {
-                let res = toDisappear(element);
-            }
-            catch (e) {
-                expect(e.message)
-                    .toBe('Matcher expects to be applied to ElementFinder object, please make sure that you pass correct object type');
-                done();
-            }
-        });
-
-        it('should support protractor 4.0 .browser_ reference instead removed .ptor_', function () {
-            var element = new Element();
-            element.ptor_ = undefined;
-            element.browser_ = new protractorMock();
-
-            let result = toDisappear(element);
-
-            result.pass.then(pass => {
-                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
                 done();
             });
         });
