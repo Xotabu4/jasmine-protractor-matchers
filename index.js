@@ -36,7 +36,13 @@ function wrapForJasmine(compareFn) {
     return function () {
         return {
             compare: function () {
-                let elementFinder = arguments[0]; //elementfinder always will be first.
+                //elementfinder always will be first.
+                let elementFinder = arguments[0]; 
+                if(!elementFinder) {
+                    throw new Error('Matcher expects to be applied to ElementFinder object,' + 
+                    'but got:' + elementFinder + 'instead');
+                
+                }
                 
                 return compareFn(elementFinder,
                     getElementFinderBrowser(elementFinder),

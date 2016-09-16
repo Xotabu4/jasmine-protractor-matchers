@@ -55,6 +55,17 @@ describe('Additional matchers: ', function () {
         }
     });
 
+    it('Should throw error on attempt to use on undefined object', function () {
+        var nonElement = undefined;
+        for (let matcher of [toAppear, toDisappear]) {
+            let wrapp = function () {
+                return matcher(nonElement);
+            };
+            expect(wrapp).toThrowError('Matcher expects to be applied to ElementFinder object,' + 
+                    'but got:' + nonElement + 'instead');
+        }
+    });
+
     it('Should support both: Protractor 3.x .ptor_ and Protractor 4.x .browser_ attributes', function () {
         var ptor4Element = new Element();
         ptor4Element.ptor_ = undefined;
