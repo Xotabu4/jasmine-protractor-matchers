@@ -20,71 +20,79 @@ function getElementFinderBrowser(elementFinder) {
     }
 }
 
-//noinspection JSCommentMatchesSignature,JSValidateJSDoc
-module.exports = {
-    /**
-     * Comparator that waits until element is visible.
-     * It is useful for situations when some element is dynamic and appears after some delay.
-     *
-     * @param actual - element that is expected to be visible. Should be ElementFinder object.
-     * @param timeout - second param. Optional. Time in milliseconds to wait for element to appear.
-     * @param message - third param. Optional. Message that overrides default error message.
-     *
-     * @returns {{compare: compare}} comparator function according to Jasmine matchers specification.
-     */
-    toAppear: function(){
+/**
+ * This functions formats compare function, and provides elementFinder and browser instances.
+ * Also passes rest of arguments as array, so they can be used (for example - timeout, message ...)
+ * 
+ * This function can (and should) be used when declaring new matchers.
+ * 
+ * compareFn will receive: 
+ * @param elementFinder - element from expect
+ * @param internalBrowser - browser extracted from element
+ * @param args - array of all args, passed to matcher, excludes elementfinder, this might be 
+ * @returns {{res: boolean, message: string}}
+ */
+function wrapForJasmine(compareFn) {
+    return function () {
         return {
-            compare: function(elementFinder){
-                let message, timeout;
-                if (typeof arguments[1] === 'string') {
-                    timeout = 3000;
-                    message = arguments[1]
-                } else {
-                    timeout = arguments[1] || 3000;
-                    message = arguments[2];
-                }
-
-                let result = {};
-                result.pass = getElementFinderBrowser(elementFinder).wait(protractor.ExpectedConditions.visibilityOf(elementFinder), timeout).then(()=>{
-                    result.message = message || "Element "+ elementFinder.parentElementArrayFinder.locator_.toString() +
-                        " was expected NOT to be shown in " + timeout + " milliseconds but is visible";
-                    return true;
-                }, err => {
-                    result.message = message || "Element " + elementFinder.parentElementArrayFinder.locator_.toString() +
-                        " was expected to be shown in " + timeout + " milliseconds but is NOT visible";
-                    return false;
-                });
-                return result;
+            compare: function () {
+                let elementFinder = arguments[0]; //elementfinder always will be first.
+                
+                return compareFn(elementFinder,
+                    getElementFinderBrowser(elementFinder),
+                    Array.prototype.slice.call(arguments, 1, arguments.length)
+                );
             }
-        }
-    },
-    /**
-     * Opposite matcher to toAppear() . Can be used for element disappearing checks.
-     */
-    toDisappear: function(){
-        return {
-            compare: function(elementFinder){
-                let message, timeout;
-                if (typeof arguments[1] === 'string') {
-                    timeout = 3000;
-                    message = arguments[1]
-                } else {
-                    timeout = arguments[1] || 3000;
-                    message = arguments[2];
-                }
-
-                let result = {};
-                result.pass = getElementFinderBrowser(elementFinder).wait(protractor.ExpectedConditions.invisibilityOf(elementFinder), timeout).then(()=>{
-                    result.message = message || "Element "+ elementFinder.parentElementArrayFinder.locator_.toString() +
-                        " was expected to be shown in " + timeout + " milliseconds but is NOT visible";
-                    return true;
-                }, err => {
-                    result.message = message || "Element " + elementFinder.parentElementArrayFinder.locator_.toString() +
-                        " was expected NOT to be shown in " + timeout + " milliseconds but is visible";
-                    return false;
-                });
-                return result;
-            }
+            // don't know yet how to better handle .not negation, this is really tricky for 
+            // matchers like .toAppear(), .toDissapear(),
+            // since they require different functions to be called inside.
+            // negativeCompare: function () {
+            //     return {pass: false, message: 'none'}
+            // }
         }
     }
+};
+
+module.exports = {
+    toAppear: wrapForJasmine(function (elementFinder, internalBrowser, args) {
+        let message, timeout;
+        if (typeof args[0] === 'string') {
+            timeout = 3000;
+            message = args[0]
+        } else {
+            timeout = args[0] || 3000;
+            message = args[1];
+        }
+
+        let result = {};
+        result.pass = internalBrowser.wait(protractor.ExpectedConditions.visibilityOf(elementFinder), timeout).then(() => {
+            return true;
+        }, err => {
+            result.message = message || "Element " + elementFinder.parentElementArrayFinder.locator_.toString() +
+                " was expected to be shown in " + timeout + " milliseconds but is NOT visible";
+            return false;
+        });
+        return result;
+    }),
+
+    toDisappear: wrapForJasmine(function (elementFinder, internalBrowser, args) {
+        let message, timeout;
+        if (typeof args[0] === 'string') {
+            timeout = 3000;
+            message = args[0]
+        } else {
+            timeout = args[0] || 3000;
+            message = args[1];
+        }
+
+        let result = {};
+        result.pass = internalBrowser.wait(protractor.ExpectedConditions.invisibilityOf(elementFinder), timeout).then(() => {
+            return true;
+        }, err => {
+            result.message = message || "Element " + elementFinder.parentElementArrayFinder.locator_.toString() +
+                " was expected NOT to be shown in " + timeout + " milliseconds but is visible";
+            return false;
+        });
+        return result;
+    })
 };

@@ -91,17 +91,22 @@ describe('Additional matchers: ', function () {
 
             result.pass.then(pass => {
                 expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
+                expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success');
                 done();
             });
         });
 
-        it('should return result object with default message, if not specified', function (done) {
+        it('should return failed result object with default message, if not specified', function (done) {
             var element = new Element();
+            element.displayed = false;
+            element.ptor_.wait = function(EC) {
+                return Promise.reject();
+            };
             let result = toAppear(element);
 
             result.pass.then(() => {
-                expect(result.message).toBe("Element " + element.parentElementArrayFinder.locator_ +
-                    " was expected NOT to be shown in " + 3000 + " milliseconds but is visible",
+                expect(result.message).toBe("Element " + element.parentElementArrayFinder.locator_.toString() +
+                " was expected to be shown in " + 3000 + " milliseconds but is NOT visible",
                     'Expected message to equal default message');
                 done();
             });
@@ -109,9 +114,13 @@ describe('Additional matchers: ', function () {
 
         it('should be able to return message object with non-default message and timeout.', function (done) {
             var element = new Element();
-            let originalWait = element.ptor_.wait;
+            element.displayed = false;
+            let originalWait = function(EC) {
+                return Promise.reject();
+            };
             element.ptor_.wait = function (EC, timeout) {
                 element.ptor_.timeout = timeout;
+                
                 return originalWait(EC, timeout);
             };
             let result = toAppear(element, 1000, 'test message');
@@ -123,9 +132,11 @@ describe('Additional matchers: ', function () {
             });
         });
 
-        it('should be able to return message object, if only message was provided', function (done) {
+        it('should be able to return failed object with message, if only message was provided', function (done) {
             var element = new Element();
-            let originalWait = element.ptor_.wait;
+            let originalWait = function(EC) {
+                return Promise.reject();
+            };
             element.ptor_.wait = function (EC, timeout) {
                 element.ptor_.timeout = timeout;
                 return originalWait(EC, timeout);
@@ -162,18 +173,24 @@ describe('Additional matchers: ', function () {
             let result = toDisappear(element);
 
             result.pass.then(pass => {
+                expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success');
                 expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
                 done();
             });
         });
 
-        it('should return result object with default message, if not specified', function (done) {
+        it('should return failed result object with default message, if not specified', function (done) {
             var element = new Element();
+            element.displayed = false;
+            element.ptor_.wait = function(EC) {
+                return Promise.reject();
+            };
             let result = toDisappear(element);
 
-            result.pass.then(() => {
-                expect(result.message).toBe("Element " + element.parentElementArrayFinder.locator_ +
-                    " was expected to be shown in " + 3000 + " milliseconds but is NOT visible",
+            result.pass.then((pass) => {
+                expect(pass).toBe(false, 'Expected result.pass to be resolved to false');
+                expect(result.message).toBe("Element " + element.parentElementArrayFinder.locator_.toString() +
+                " was expected NOT to be shown in " + 3000 + " milliseconds but is visible",
                     'Expected message to equal default message');
                 done();
             });
@@ -181,14 +198,17 @@ describe('Additional matchers: ', function () {
 
         it('should be able to return message object with non-default message and timeout.', function (done) {
             var element = new Element();
-            let originalWait = element.ptor_.wait;
+            let originalWait = function(EC) {
+                return Promise.reject();
+            };
             element.ptor_.wait = function (EC, timeout) {
                 element.ptor_.timeout = timeout;
                 return originalWait(EC, timeout);
             };
             let result = toDisappear(element, 1000, 'test message');
 
-            result.pass.then(() => {
+            result.pass.then((pass) => {
+                expect(pass).toBe(false, 'Expected result.pass to be resolved to false');
                 expect(result.message).toBe('test message');
                 expect(element.ptor_.timeout).toBe(1000);
                 done();
@@ -197,14 +217,17 @@ describe('Additional matchers: ', function () {
 
         it('should be able to return message object, if only message was provided', function (done) {
             var element = new Element();
-            let originalWait = element.ptor_.wait;
+            let originalWait = function(EC) {
+                return Promise.reject();
+            };
             element.ptor_.wait = function (EC, timeout) {
                 element.ptor_.timeout = timeout;
                 return originalWait(EC, timeout);
             };
             let result = toDisappear(element, 'test message');
 
-            result.pass.then(() => {
+            result.pass.then((pass) => {
+                expect(pass).toBe(false, 'Expected result.pass to be resolved to false');
                 expect(result.message).toBe('test message');
                 done();
             });
