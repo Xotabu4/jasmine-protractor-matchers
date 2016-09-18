@@ -1,11 +1,16 @@
 "use strict";
+/*
+ * Created by xotabu4 on 21.03.2016.
+ */
 
 /**
  * Used to acquire internal browser from element.
  * Protractor 4.0 has breaking change in this - .ptor_ was renamed to .browser_
  * In order to provide backward compatibility - trying to detect browser in both places.
- *
- * @returns Protractor instance - browser
+ * 
+ * @private
+ * @param {{ptor_: Object} | {browser_: Object}}  elementFinder from protractor < 3.x or 4.x
+ * @returns {Object} Protractor browser instance
  */
 function getElementFinderBrowser(elementFinder) {
     if (elementFinder.ptor_ == undefined) {
@@ -21,45 +26,55 @@ function getElementFinderBrowser(elementFinder) {
 }
 
 /**
- * This functions formats compare function, and provides elementFinder and browser instances.
- * Also passes rest of arguments as array, so they can be used (for example - timeout, message ...)
+ * Receives compare function, and supplies elementFinder and browser instances to it.
+ * Also passes rest of arguments as array, so they can be used (for example - timeout and message)
  * 
  * This function can (and should) be used when declaring new matchers.
  * 
- * compareFn will receive: 
- * @param elementFinder - element from expect
- * @param internalBrowser - browser extracted from element
- * @param args - array of all args, passed to matcher, excludes elementfinder, this might be 
- * @returns {{res: boolean, message: string}}
+ * @private
+ * @param {function} compareFn comparator function, Will receive as arguments: 
+ *    elementFinder {ElementFinder} - element to apply matcher
+ * 
+ *    internalBrowser {Protractor} - browser extracted from elementFinder
+ * 
+ *    arguments {Array} - array of rest of arguments passed to matcher, excludes elementFinder
+ * @returns {function} that will be used by Jasmine to compare
  */
 function wrapForJasmine(compareFn) {
     return function () {
         return {
             compare: function () {
-                //elementfinder always will be first.
-                let elementFinder = arguments[0]; 
-                if(!elementFinder) {
-                    throw new Error('Matcher expects to be applied to ElementFinder object,' + 
-                    'but got:' + elementFinder + 'instead');
-                
+                //elementfinder always will be first, this is jasmine logic for .expect()
+                let elementFinder = arguments[0];
+                if (!elementFinder) {
+                    throw new Error('Matcher expects to be applied to ElementFinder object,' +
+                        'but got:' + elementFinder + 'instead');
                 }
-                
+
                 return compareFn(elementFinder,
                     getElementFinderBrowser(elementFinder),
                     Array.prototype.slice.call(arguments, 1, arguments.length)
                 );
-            }
+            },
             // don't know yet how to better handle .not negation, this is really tricky for 
             // matchers like .toAppear(), .toDissapear(),
             // since they require different functions to be called inside.
-            // negativeCompare: function () {
-            //     return {pass: false, message: 'none'}
-            // }
+            negativeCompare: function () {
+                throw Error('.not() negation is not supported for jasmine-protractor-matchers, use opposite matcher instead')
+            }
         }
     }
 };
 
 module.exports = {
+    //Unfortunately JSDocs are not support override @type of property. So using plain text to show help.
+    /**
+     * Matcher for asserting that element is present and visible.
+     * Should be applied to ElementFinder object only.
+     * Optional Parameters:
+     * [timeout=3000] - Timeout to wait for appear of element in milliseconds.|
+     * [message='Element ELEMENT_LOCATOR was expected to be shown in TIMEOUT milliseconds but is NOT visible'] Custom error message to throw on assertion failure.
+     */
     toAppear: wrapForJasmine(function (elementFinder, internalBrowser, args) {
         let message, timeout;
         if (typeof args[0] === 'string') {
@@ -80,7 +95,13 @@ module.exports = {
         });
         return result;
     }),
-
+    /**
+     * Matcher for asserting that element is not displayed on the page.
+     * Should be applied to ElementFinder object only.
+     * Optional Parameters:
+     * [timeout=3000] - Timeout to wait for disappear of element in milliseconds.|
+     * [message='Element ELEMENT_LOCATOR was expected NOT to be shown in TIMEOUT milliseconds but is visible'] Custom error message to throw on assertion failure.
+     */
     toDisappear: wrapForJasmine(function (elementFinder, internalBrowser, args) {
         let message, timeout;
         if (typeof args[0] === 'string') {

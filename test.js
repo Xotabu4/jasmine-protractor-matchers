@@ -1,5 +1,5 @@
-/**
- * Created by xotab on 21.03.2016.
+/*
+ * Created by xotabu4 on 21.03.2016.
  */
 "use strict";
 var Jasmine = require('jasmine');
@@ -45,9 +45,22 @@ describe('Additional matchers: ', function () {
     let toAppear = matchers.toAppear().compare;
     let toDisappear = matchers.toDisappear().compare;
 
+    let matchersFunctions = [toAppear, toDisappear];
+
+   it('Should throw error on attempt call negateCompare', function () {
+        let negativeCompares = [
+            matchers.toAppear().negativeCompare,
+            matchers.toDisappear().negativeCompare,
+        ]
+
+        for (let negMatcher of negativeCompares) {
+            expect(negMatcher).toThrowError('.not() negation is not supported for jasmine-protractor-matchers, use opposite matcher instead');
+        }
+    });
+
     it('Should throw error on attempt to use on object without browser reference', function () {
         var nonElement = {};
-        for (let matcher of [toAppear, toDisappear]) {
+        for (let matcher of matchersFunctions) {
             let wrapp = function () {
                 return matcher(nonElement);
             };
@@ -57,7 +70,7 @@ describe('Additional matchers: ', function () {
 
     it('Should throw error on attempt to use on undefined object', function () {
         var nonElement = undefined;
-        for (let matcher of [toAppear, toDisappear]) {
+        for (let matcher of matchersFunctions) {
             let wrapp = function () {
                 return matcher(nonElement);
             };
@@ -70,7 +83,7 @@ describe('Additional matchers: ', function () {
         var ptor4Element = new Element();
         ptor4Element.ptor_ = undefined;
         ptor4Element.browser_ = new protractorMock();
-        for (let matcher of [toAppear, toDisappear]) {
+        for (let matcher of matchersFunctions) {
             let wrapp = function () {
                 return matcher(ptor4Element);
             };
@@ -82,7 +95,7 @@ describe('Additional matchers: ', function () {
         }
 
         var ptor3Element = new Element();
-        for (let matcher of [toAppear, toDisappear]) {
+        for (let matcher of matchersFunctions) {
             let wrapp = function () {
                 return matcher(ptor3Element);
             };
