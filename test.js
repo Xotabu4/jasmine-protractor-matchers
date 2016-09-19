@@ -79,7 +79,7 @@ describe('Additional matchers: ', function () {
         }
     });
 
-    it('Should support both: Protractor 3.x .ptor_ and Protractor 4.x .browser_ attributes', function () {
+    it('Should support both: Protractor 3.x .ptor_ and Protractor 4.x .browser_ attributes', function (done) {
         var ptor4Element = new Element();
         ptor4Element.ptor_ = undefined;
         ptor4Element.browser_ = new protractorMock();
