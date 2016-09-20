@@ -47,7 +47,7 @@ describe('Additional matchers: ', function () {
 
     let matchersFunctions = [toAppear, toDisappear];
 
-   it('Should throw error on attempt call negateCompare', function () {
+   it('Should throw error on attempt to call negateCompare', function () {
         let negativeCompares = [
             matchers.toAppear().negativeCompare,
             matchers.toDisappear().negativeCompare,
@@ -58,7 +58,7 @@ describe('Additional matchers: ', function () {
         }
     });
 
-    it('Should throw error on attempt to use on object without browser reference', function () {
+    it('Should throw error on attempt to be used on object without browser reference', function () {
         var nonElement = {};
         for (let matcher of matchersFunctions) {
             let wrapp = function () {
@@ -68,7 +68,7 @@ describe('Additional matchers: ', function () {
         }
     });
 
-    it('Should throw error on attempt to use on undefined object', function () {
+    it('Should throw error on attempt to be used on undefined object', function () {
         var nonElement = undefined;
         for (let matcher of matchersFunctions) {
             let wrapp = function () {
@@ -87,7 +87,7 @@ describe('Additional matchers: ', function () {
             let wrapp = function () {
                 return matcher(ptor4Element);
             };
-            expect(wrapp).not.toThrowError('Matcher expects to be applied to ElementFinder object, please make sure that you pass correct object type');
+            expect(wrapp).not.toThrowError('Matcher is expected to be applied to ElementFinder object, please make sure that you pass correct object type');
             wrapp().pass.then(pass => {
                 expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
 
@@ -99,7 +99,7 @@ describe('Additional matchers: ', function () {
             let wrapp = function () {
                 return matcher(ptor3Element);
             };
-            expect(wrapp).not.toThrowError('Matcher expects to be applied to ElementFinder object, please make sure that you pass correct object type');
+            expect(wrapp).not.toThrowError('Matcher is expected to be applied to ElementFinder object, please make sure that you pass correct object type');
             wrapp().pass.then(pass => {
                 expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
                 done();
@@ -173,7 +173,7 @@ describe('Additional matchers: ', function () {
             });
         });
 
-        it('should reject result.pass if wait was failed', function (done) {
+        it('should reject result.pass if wait has failed', function (done) {
             var element = new Element();
             element.displayed = false;
             element.ptor_.wait = function(EC) {
@@ -257,7 +257,7 @@ describe('Additional matchers: ', function () {
             });
         });
 
-        it('should reject result.pass if wait was failed', function (done) {
+        it('should reject result.pass if wait has failed', function (done) {
             var element = new Element();
             element.displayed = false;
             element.ptor_.wait = function(EC) {
