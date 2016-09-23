@@ -3,7 +3,7 @@ JasmineJS matchers for ProtractorJS
 [![Build Status](https://travis-ci.org/Xotabu4/jasmine-protractor-matchers.svg?branch=master)](https://travis-ci.org/Xotabu4/jasmine-protractor-matchers)[![npm version](https://badge.fury.io/js/jasmine-protractor-matchers.svg)](https://badge.fury.io/js/jasmine-protractor-matchers)[![NPM License](https://img.shields.io/npm/l/jasmine-protractor-matchers.svg)](https://travis-ci.org/Xotabu4/jasmine-protractor-matchers)
 
 
-This module adds some matchers that can be useful for those who develop test cases with ProtractorJS
+This module adds some matchers that can be useful for those who develop test cases with ProtractorJS and Jasmine
 
 Supported versions
 ---------------------
@@ -39,7 +39,7 @@ onPrepare: function() {
     });
 ```
 
-But you can also include only in those specs where it needed, just be sure that you are adding matchers before 'it' function: 
+But you can also include matchers only in those specs where it is needed, just ensure that you are adding matchers before 'it' function: 
 
 some_jasmine_spec.js
 ```javascript
