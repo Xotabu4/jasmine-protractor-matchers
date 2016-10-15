@@ -75,7 +75,7 @@ describe('Additional matchers: ', function () {
                 return matcher(nonElement);
             };
             expect(wrapp).toThrowError('Matcher expects to be applied to ElementFinder object,' + 
-                    'but got:' + nonElement + 'instead');
+                    'but got: ' + nonElement + ' instead');
         }
     });
 
