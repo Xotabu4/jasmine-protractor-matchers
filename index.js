@@ -48,7 +48,7 @@ function wrapForJasmine(compareFn) {
                 let elementFinder = arguments[0];
                 if (!elementFinder) {
                     throw new Error('Matcher expects to be applied to ElementFinder object,' +
-                        'but got:' + elementFinder + 'instead');
+                        'but got: ' + elementFinder + ' instead');
                 }
 
                 return compareFn(elementFinder,
