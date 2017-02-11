@@ -12,10 +12,12 @@ NodeJS:
 - 4.x
 - 5.x
 - 6.x
+- 7.x
 
 ProtractorJS:
 - 3.x
 - 4.x
+- 5.x
 
 
 Installing
