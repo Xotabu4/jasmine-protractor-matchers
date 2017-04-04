@@ -29,13 +29,13 @@ npm install jasmine-protractor-matchers --save-dev
 
 Importing and enabling
 ---------------------
-I prefer to add matchers in beforeAll function, that I put into onPrepare:
+I prefer to add matchers in beforeEach function, that I put into onPrepare:
 
 In your protractor.config.js:
 ```javascript
 onPrepare: function() {
     var protractorMatchers = require('jasmine-protractor-matchers');
-    beforeAll(function() {
+    beforeEach(function() {
         jasmine.addMatchers(protractorMatchers);
         //Some code that needs to be executed before all tests only once.
     });
