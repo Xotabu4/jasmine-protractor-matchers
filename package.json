@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "Collection of additional jasmine matchers, that is useful for those who develop e2e tests using protractor",
   "main": "index.js",
-  "types": "index.d.ts",
+  "types": "./index",
   "scripts": {
     "test": "node test.js"
   },
@@ -23,10 +23,12 @@
   },
   "homepage": "https://github.com/Xotabu4/jasmine-protractor-matchers#readme",
   "peerDependencies": {
-    "protractor": "3.0.0 - 5.1.1"
+    "protractor": "3.0.0 - 5.x.x",
+    "jasmine": "2.x.x"
   },
   "devDependencies": {
     "@types/jasmine": "^2.5.38",
-    "jasmine": "2.4.1"
+    "@types/node": "^7.0.12",
+    "jasmine": "^2.5.0"
   }
 }
