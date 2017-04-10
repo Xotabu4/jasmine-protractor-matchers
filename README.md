@@ -37,7 +37,7 @@ onPrepare: function() {
     var protractorMatchers = require('jasmine-protractor-matchers');
     beforeEach(function() {
         jasmine.addMatchers(protractorMatchers);
-        //Some code that needs to be executed before all tests only once.
+        //Some code that needs to be executed before every test.
     });
 ```
 
