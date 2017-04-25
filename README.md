@@ -19,6 +19,7 @@ ProtractorJS:
 - 4.x
 - 5.x
 
+Typings for TypeScript are included
 
 Installing
 ---------------------
@@ -55,6 +56,26 @@ describe('Some test suite', function () {
     });
 });
 ```
+
+#### TypeScript
+
+To import matchers - use approach with `require` as in JS:
+```typescript
+onPrepare: function() {
+    var protractorMatchers = require('jasmine-protractor-matchers');
+    beforeAll(function() {
+        jasmine.addMatchers(protractorMatchers);
+        //Some code that needs to be executed before all tests only once.
+    });
+```
+
+But in jasmine spec files where you want to use this matchers, you must add this line to the top of the file:
+```xml
+/// <reference types="jasmine-protractor-matchers" />
+```
+
+This needs to be done to let TypeScript know that we have extended jasmine module with additional matchers. Now you should see aditional suggestions in autocomplete, and typings support.
+
 
 Usage
 -----
