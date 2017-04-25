@@ -3,7 +3,7 @@
   "version": "1.0.1",
   "description": "Collection of additional jasmine matchers, that is useful for those who develop e2e tests using protractor",
   "main": "index.js",
-  "types": "./index",
+  "types": "index.d.ts",
   "scripts": {
     "test": "node test.js"
   },
