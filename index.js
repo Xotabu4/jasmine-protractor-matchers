@@ -1,4 +1,3 @@
-"use strict";
 /*
  * Created by xotabu4 on 21.03.2016.
  */
@@ -51,10 +50,12 @@ function wrapForJasmine(compareFn) {
                         'but got: ' + elementFinder + ' instead');
                 }
 
-                return compareFn(elementFinder,
-                    getElementFinderBrowser(elementFinder),
-                    Array.prototype.slice.call(arguments, 1, arguments.length)
-                );
+                // updating list of arguments to put element and browser to begin, and rest as spreaded arguments
+                var formatedArgs = [elementFinder, getElementFinderBrowser(elementFinder)]
+                    .concat(Array.prototype.slice.call(arguments, 1, arguments.length))
+
+                // Apply needed to pass array as params, not as single parameter
+                return compareFn.apply(undefined, formatedArgs);
             },
             // don't know yet how to better handle .not negation, this is really tricky for 
             // matchers like .toAppear(), .toDissapear(),
@@ -66,6 +67,18 @@ function wrapForJasmine(compareFn) {
     }
 };
 
+var helpers = {
+    hasClass: function (elem, classString) {
+        return elem.getAttribute('class').then(classes => {
+            // splitting to avoid false positive 'inactiveGrayed inactive'.indexOf('active') !== -1
+            classes = classes.split(' ');
+            return classes.indexOf(classString) !== -1 // to be compatible with nodejs 4.x
+        }, err => {
+            return false
+        });
+    }
+}
+
 module.exports = {
     //Unfortunately JSDocs are not support override @type of property. So using plain text to show help.
     /**
@@ -75,26 +88,29 @@ module.exports = {
      * [timeout=3000] - Timeout to wait for appear of element in milliseconds.|
      * [message='Element ELEMENT_LOCATOR was expected to be shown in TIMEOUT milliseconds but is NOT visible'] Custom error message to throw on assertion failure.
      */
-    toAppear: wrapForJasmine(function (elementFinder, internalBrowser, args) {
-        let message, timeout;
-        if (typeof args[0] === 'string') {
+    toAppear: wrapForJasmine(function toAppearFunc(elementFinder, internalBrowser, timeout, message) {
+        if (typeof timeout === 'string') {
+            message = timeout
             timeout = 3000;
-            message = args[0]
-        } else {
-            timeout = args[0] || 3000;
-            message = args[1];
+        } else if (timeout === undefined) {
+            timeout = 3000
         }
+        if (message === undefined) {
+            message = `Element ${elementFinder.locator().toString()} was expected to be shown in ${timeout} milliseconds but is NOT visible`;
+        };
 
-        let result = {};
-        result.pass = internalBrowser.wait(protractor.ExpectedConditions.visibilityOf(elementFinder), timeout).then(() => {
-            return true;
-        }, err => {
-            result.message = message || "Element " + elementFinder.parentElementArrayFinder.locator_.toString() +
-                " was expected to be shown in " + timeout + " milliseconds but is NOT visible";
-            return false;
-        });
+        var result = {};
+
+        result.pass = internalBrowser.wait(protractor.ExpectedConditions.visibilityOf(elementFinder), timeout)
+            .then(() => {
+                return true;
+            }, err => {
+                result.message = message
+                return false;
+            });
         return result;
     }),
+
     /**
      * Matcher for asserting that element is not displayed on the page.
      * Should be applied to ElementFinder object only.
@@ -102,22 +118,48 @@ module.exports = {
      * [timeout=3000] - Timeout to wait for disappear of element in milliseconds.|
      * [message='Element ELEMENT_LOCATOR was expected NOT to be shown in TIMEOUT milliseconds but is visible'] Custom error message to throw on assertion failure.
      */
-    toDisappear: wrapForJasmine(function (elementFinder, internalBrowser, args) {
-        let message, timeout;
-        if (typeof args[0] === 'string') {
+    toDisappear: wrapForJasmine(function toDisappearFunc(elementFinder, internalBrowser, timeout = 3000, message) {
+        if (typeof timeout === 'string') {
+            message = timeout
             timeout = 3000;
-            message = args[0]
-        } else {
-            timeout = args[0] || 3000;
-            message = args[1];
+        } else if (timeout === undefined) {
+            timeout = 3000
         }
+        if (message === undefined) {
+            message = `Element ${elementFinder.locator().toString()} was expected NOT to be shown in ${timeout} milliseconds but is visible`;
+        };
 
-        let result = {};
-        result.pass = internalBrowser.wait(protractor.ExpectedConditions.invisibilityOf(elementFinder), timeout).then(() => {
+        var result = {};
+
+        result.pass = internalBrowser.wait(protractor.ExpectedConditions.invisibilityOf(elementFinder), timeout)
+            .then(() => {
+                return true;
+            }, err => {
+                result.message = message
+                return false;
+            });
+        return result;
+    }),
+
+    toContainClass: wrapForJasmine(function (elementFinder, internalBrowser, className, timeout, message) {
+        if (className === undefined || typeof className !== 'string' || !className.includes(' ')) {
+            throw new Error(`toContainClass className argument is a mandatory and should be a string, without spaces but got: ${className} instead`);
+        }
+        if (typeof timeout === 'string') {
+            message = timeout
+            timeout = 3000;
+        } else if (timeout === undefined) {
+            timeout = 3000
+        }
+        if (message === undefined) {
+            args.message = `Element ${elementFinder.locator().toString()} was expected to have class ${className} in ${timeout} milliseconds`;
+        };
+
+        var result = {};
+        result.pass = internalBrowser.wait(() => helpers.hasClass(className), timeout).then(() => {
             return true;
         }, err => {
-            result.message = message || "Element " + elementFinder.parentElementArrayFinder.locator_.toString() +
-                " was expected NOT to be shown in " + timeout + " milliseconds but is visible";
+            result.message = message
             return false;
         });
         return result;

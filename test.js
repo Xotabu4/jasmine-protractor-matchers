@@ -30,11 +30,12 @@ class protractorMock {
 
 class Element {
     constructor() {
-        this.parentElementArrayFinder = {locator_: 'test locator'};
-        this.ptor_ =  new protractorMock();
+        this.parentElementArrayFinder = { locator_: 'test locator' };
+        this.locator = () => this.parentElementArrayFinder.locator_;
+        this.ptor_ = new protractorMock();
         this.displayed = true;
     }
-    isDisplayed() {return this.displayed}
+    isDisplayed() { return this.displayed }
 }
 
 global.protractor = new protractorMock();
@@ -47,7 +48,7 @@ describe('Additional matchers: ', function () {
 
     let matchersFunctions = [toAppear, toDisappear];
 
-   it('Should throw error on attempt to call negateCompare', function () {
+    it('Should throw error on attempt to call negateCompare', function () {
         let negativeCompares = [
             matchers.toAppear().negativeCompare,
             matchers.toDisappear().negativeCompare,
@@ -74,8 +75,8 @@ describe('Additional matchers: ', function () {
             let wrapp = function () {
                 return matcher(nonElement);
             };
-            expect(wrapp).toThrowError('Matcher expects to be applied to ElementFinder object,' + 
-                    'but got: ' + nonElement + ' instead');
+            expect(wrapp).toThrowError('Matcher expects to be applied to ElementFinder object,' +
+                'but got: ' + nonElement + ' instead');
         }
     });
 
@@ -123,14 +124,14 @@ describe('Additional matchers: ', function () {
         it('should return failed result object with default message, if not specified', function (done) {
             var element = new Element();
             element.displayed = false;
-            element.ptor_.wait = function(EC) {
+            element.ptor_.wait = function (EC) {
                 return Promise.reject();
             };
             let result = toAppear(element);
 
             result.pass.then(() => {
                 expect(result.message).toBe("Element " + element.parentElementArrayFinder.locator_.toString() +
-                " was expected to be shown in " + 3000 + " milliseconds but is NOT visible",
+                    " was expected to be shown in " + 3000 + " milliseconds but is NOT visible",
                     'Expected message to equal default message');
                 done();
             });
@@ -139,12 +140,12 @@ describe('Additional matchers: ', function () {
         it('should be able to return message object with non-default message and timeout.', function (done) {
             var element = new Element();
             element.displayed = false;
-            let originalWait = function(EC) {
+            let originalWait = function (EC) {
                 return Promise.reject();
             };
             element.ptor_.wait = function (EC, timeout) {
                 element.ptor_.timeout = timeout;
-                
+
                 return originalWait(EC, timeout);
             };
             let result = toAppear(element, 1000, 'test message');
@@ -158,7 +159,7 @@ describe('Additional matchers: ', function () {
 
         it('should be able to return failed object with message, if only message was provided', function (done) {
             var element = new Element();
-            let originalWait = function(EC) {
+            let originalWait = function (EC) {
                 return Promise.reject();
             };
             element.ptor_.wait = function (EC, timeout) {
@@ -176,12 +177,12 @@ describe('Additional matchers: ', function () {
         it('should reject result.pass if wait has failed', function (done) {
             var element = new Element();
             element.displayed = false;
-            element.ptor_.wait = function(EC) {
+            element.ptor_.wait = function (EC) {
                 return Promise.reject();
             };
 
             let res = toAppear(element);
-            res.pass.then(result=> {
+            res.pass.then(result => {
                 expect(result).toBe(false);
                 expect(res.message).toBe('Element test locator was expected to be shown in 3000 milliseconds but is NOT visible');
                 done();
@@ -206,7 +207,7 @@ describe('Additional matchers: ', function () {
         it('should return failed result object with default message, if not specified', function (done) {
             var element = new Element();
             element.displayed = false;
-            element.ptor_.wait = function(EC) {
+            element.ptor_.wait = function (EC) {
                 return Promise.reject();
             };
             let result = toDisappear(element);
@@ -214,7 +215,7 @@ describe('Additional matchers: ', function () {
             result.pass.then((pass) => {
                 expect(pass).toBe(false, 'Expected result.pass to be resolved to false');
                 expect(result.message).toBe("Element " + element.parentElementArrayFinder.locator_.toString() +
-                " was expected NOT to be shown in " + 3000 + " milliseconds but is visible",
+                    " was expected NOT to be shown in " + 3000 + " milliseconds but is visible",
                     'Expected message to equal default message');
                 done();
             });
@@ -222,7 +223,7 @@ describe('Additional matchers: ', function () {
 
         it('should be able to return message object with non-default message and timeout.', function (done) {
             var element = new Element();
-            let originalWait = function(EC) {
+            let originalWait = function (EC) {
                 return Promise.reject();
             };
             element.ptor_.wait = function (EC, timeout) {
@@ -241,7 +242,7 @@ describe('Additional matchers: ', function () {
 
         it('should be able to return message object, if only message was provided', function (done) {
             var element = new Element();
-            let originalWait = function(EC) {
+            let originalWait = function (EC) {
                 return Promise.reject();
             };
             element.ptor_.wait = function (EC, timeout) {
@@ -260,12 +261,12 @@ describe('Additional matchers: ', function () {
         it('should reject result.pass if wait has failed', function (done) {
             var element = new Element();
             element.displayed = false;
-            element.ptor_.wait = function(EC) {
+            element.ptor_.wait = function (EC) {
                 return Promise.reject();
             };
 
             let res = toDisappear(element);
-            res.pass.then(result=> {
+            res.pass.then(result => {
                 expect(result).toBe(false);
                 expect(res.message).toBe('Element test locator was expected NOT to be shown in 3000 milliseconds but is visible');
                 done();
@@ -273,7 +274,7 @@ describe('Additional matchers: ', function () {
         });
 
     });
-    
+
 });
 
 jasmine.execute(['test.js']);
