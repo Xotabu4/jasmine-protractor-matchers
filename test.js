@@ -32,7 +32,7 @@ class Element {
     constructor() {
         this.parentElementArrayFinder = { locator_: 'test locator' };
         this.locator = () => this.parentElementArrayFinder.locator_;
-        this.ptor_ = new protractorMock();
+        this.browser_ = new protractorMock();
         this.displayed = true;
     }
     isDisplayed() { return this.displayed }
@@ -80,10 +80,8 @@ describe('Additional matchers: ', function () {
         }
     });
 
-    it('Should support both: Protractor 3.x .ptor_ and Protractor 4.x .browser_ attributes', function (done) {
+    it('Should support Protractor 4.x .browser_ attribute', function (done) {
         var ptor4Element = new Element();
-        ptor4Element.ptor_ = undefined;
-        ptor4Element.browser_ = new protractorMock();
         for (let matcher of matchersFunctions) {
             let wrapp = function () {
                 return matcher(ptor4Element);
@@ -91,19 +89,7 @@ describe('Additional matchers: ', function () {
             expect(wrapp).not.toThrowError('Matcher is expected to be applied to ElementFinder object, please make sure that you pass correct object type');
             wrapp().pass.then(pass => {
                 expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
-
-            });
-        }
-
-        var ptor3Element = new Element();
-        for (let matcher of matchersFunctions) {
-            let wrapp = function () {
-                return matcher(ptor3Element);
-            };
-            expect(wrapp).not.toThrowError('Matcher is expected to be applied to ElementFinder object, please make sure that you pass correct object type');
-            wrapp().pass.then(pass => {
-                expect(pass).toBe(true, 'Expected result.pass to be resolved to true');
-                done();
+                done()
             });
         }
     });
@@ -124,7 +110,7 @@ describe('Additional matchers: ', function () {
         it('should return failed result object with default message, if not specified', function (done) {
             var element = new Element();
             element.displayed = false;
-            element.ptor_.wait = function (EC) {
+            element.browser_.wait = function (EC) {
                 return Promise.reject();
             };
             let result = toAppear(element);
@@ -143,8 +129,8 @@ describe('Additional matchers: ', function () {
             let originalWait = function (EC) {
                 return Promise.reject();
             };
-            element.ptor_.wait = function (EC, timeout) {
-                element.ptor_.timeout = timeout;
+            element.browser_.wait = function (EC, timeout) {
+                element.browser_.timeout = timeout;
 
                 return originalWait(EC, timeout);
             };
@@ -152,7 +138,7 @@ describe('Additional matchers: ', function () {
 
             result.pass.then(() => {
                 expect(result.message).toBe('test message');
-                expect(element.ptor_.timeout).toBe(1000);
+                expect(element.browser_.timeout).toBe(1000);
                 done();
             });
         });
@@ -162,8 +148,8 @@ describe('Additional matchers: ', function () {
             let originalWait = function (EC) {
                 return Promise.reject();
             };
-            element.ptor_.wait = function (EC, timeout) {
-                element.ptor_.timeout = timeout;
+            element.browser_.wait = function (EC, timeout) {
+                element.browser_.timeout = timeout;
                 return originalWait(EC, timeout);
             };
             let result = toAppear(element, 'test message');
@@ -177,7 +163,7 @@ describe('Additional matchers: ', function () {
         it('should reject result.pass if wait has failed', function (done) {
             var element = new Element();
             element.displayed = false;
-            element.ptor_.wait = function (EC) {
+            element.browser_.wait = function (EC) {
                 return Promise.reject();
             };
 
@@ -207,7 +193,7 @@ describe('Additional matchers: ', function () {
         it('should return failed result object with default message, if not specified', function (done) {
             var element = new Element();
             element.displayed = false;
-            element.ptor_.wait = function (EC) {
+            element.browser_.wait = function (EC) {
                 return Promise.reject();
             };
             let result = toDisappear(element);
@@ -226,8 +212,8 @@ describe('Additional matchers: ', function () {
             let originalWait = function (EC) {
                 return Promise.reject();
             };
-            element.ptor_.wait = function (EC, timeout) {
-                element.ptor_.timeout = timeout;
+            element.browser_.wait = function (EC, timeout) {
+                element.browser_.timeout = timeout;
                 return originalWait(EC, timeout);
             };
             let result = toDisappear(element, 1000, 'test message');
@@ -235,7 +221,7 @@ describe('Additional matchers: ', function () {
             result.pass.then((pass) => {
                 expect(pass).toBe(false, 'Expected result.pass to be resolved to false');
                 expect(result.message).toBe('test message');
-                expect(element.ptor_.timeout).toBe(1000);
+                expect(element.browser_.timeout).toBe(1000);
                 done();
             });
         });
@@ -245,8 +231,8 @@ describe('Additional matchers: ', function () {
             let originalWait = function (EC) {
                 return Promise.reject();
             };
-            element.ptor_.wait = function (EC, timeout) {
-                element.ptor_.timeout = timeout;
+            element.browser_.wait = function (EC, timeout) {
+                element.browser_.timeout = timeout;
                 return originalWait(EC, timeout);
             };
             let result = toDisappear(element, 'test message');
@@ -261,7 +247,7 @@ describe('Additional matchers: ', function () {
         it('should reject result.pass if wait has failed', function (done) {
             var element = new Element();
             element.displayed = false;
-            element.ptor_.wait = function (EC) {
+            element.browser_.wait = function (EC) {
                 return Promise.reject();
             };
 

@@ -5,7 +5,9 @@
   "main": "index.js",
   "types": "index.d.ts",
   "scripts": {
-    "test": "node test.js"
+    "pretest": "tsc",
+    "test": "node test.js",
+    "prepublish": "tsc"
   },
   "repository": {
     "type": "git",
@@ -29,6 +31,8 @@
   "devDependencies": {
     "@types/jasmine": "^2.5.38",
     "@types/node": "^7.0.12",
-    "jasmine": "^2.5.0"
+    "jasmine": "^2.5.0",
+    "typescript": "2.4.1",
+    "arguejs": "0.2.3"
   }
 }
