@@ -1,11 +1,13 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "target": "es3",
         "module": "commonjs",
         "sourceMap": true
     },
     "exclude": [
-        "node_modules",
-        "old"
+        "node_modules/"
+    ],
+    "lib": [
+        "es2015"
     ]
 }

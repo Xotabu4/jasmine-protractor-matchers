@@ -35,7 +35,7 @@ class Matcher {
             },
             negativeCompare: (...args) => {
                 if (this.options.negativeCompareFunc === undefined) {
-                    let funcName = this.options.compareFunc.name
+                    let funcName = (this.options.compareFunc as any).name
                     throw Error(`Matcher ${funcName} does not supports negation with .not()`)
                 }
                 const argumentsObject = this.prepareArgumentsObject(args)

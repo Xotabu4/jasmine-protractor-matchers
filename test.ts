@@ -6,6 +6,8 @@ let Jasmine = require('jasmine')
 let jasmineRunner = new Jasmine()
 import matchers from './index'
 
+declare let Promise:any
+
 //////////////////////// MOCKS ////////////////////////
 // TODO: Move mocks to separate file
 class MockedBrowser {
@@ -404,7 +406,7 @@ describe('Matcher', function () {
             expect(wrapped).toThrowError(`parameter 'className' waiting for String argument but received Undefined`)
         })
 
-        it('should return {pass: Promise<true>} for element with specified class', function (done) {
+        xit('should return {pass: Promise<true>} for element with specified class', function (done) {
             let result = toHaveClass.compare(new VisibleElement().setAttribute('class', 'test'), 'test')
 
             result.pass.then(passvalue => {
@@ -413,7 +415,7 @@ describe('Matcher', function () {
                 done()
             })
         })
-
+        // TODO: Tottaly not ready, even names are copypasted and nothing changed
         xit('should return {pass: Promise<false>, message:string} for visible element', function (done) {
             let elem = new VisibleElement()
             let result = toDisappear.compare(elem)
@@ -423,7 +425,7 @@ describe('Matcher', function () {
                 done()
             })
         })
-
+        // TODO: Tottaly not ready, even names are copypasted and nothing changed
         xit('should return {pass: Promise<false>, message:string} for visible element, when timeout is specified', function (done) {
             let elem = new VisibleElement()
             const custom_timeout = 1000
@@ -439,7 +441,7 @@ describe('Matcher', function () {
                 done()
             })
         })
-
+        // TODO: Tottaly not ready, even names are copypasted and nothing changed
         xit('should return {pass: Promise<false>, message:string} for visible element, when error message is specified', function (done) {
             let elem = new VisibleElement()
             const custom_error_message = 'custom error message'
@@ -455,7 +457,7 @@ describe('Matcher', function () {
                 done()
             })
         })
-
+        // TODO: Tottaly not ready, even names are copypasted and nothing changed
         xit('should return {pass: Promise<false>, message:string} for visible element, when timeout and error message is specified', function (done) {
             let elem = new VisibleElement()
             const custom_timeout = 1000
@@ -474,7 +476,9 @@ describe('Matcher', function () {
         })
 
         xdescribe('with .not', function () {
-            it('should return {pass: Promise<true>} for visible element', function (done) {
+            // TODO: Tottaly not ready, even names are copypasted and nothing changed
+
+            xit('should return {pass: Promise<true>} for visible element', function (done) {
                 let result = toDisappear.negativeCompare(new VisibleElement())
 
                 result.pass.then(passvalue => {
@@ -484,7 +488,7 @@ describe('Matcher', function () {
                 })
             })
 
-            it('should return {pass: Promise<false>, message:string} for non-visible element', function (done) {
+            xit('should return {pass: Promise<false>, message:string} for non-visible element', function (done) {
                 let elem = new VisibleElement()
                 let result = toDisappear.negativeCompare(elem)
                 result.pass.then((passvalue) => {
@@ -494,7 +498,7 @@ describe('Matcher', function () {
                 })
             })
 
-            it('should return {pass: Promise<false>, message:string} for non-visible element, when timeout is specified', function (done) {
+            xit('should return {pass: Promise<false>, message:string} for non-visible element, when timeout is specified', function (done) {
                 let elem = new VisibleElement()
                 const custom_timeout = 1000
                 spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
@@ -510,7 +514,7 @@ describe('Matcher', function () {
                 })
             })
 
-            it('should return {pass: Promise<false>, message:string} for non-visible element, when error message is specified', function (done) {
+            xit('should return {pass: Promise<false>, message:string} for non-visible element, when error message is specified', function (done) {
                 let elem = new VisibleElement()
                 const custom_error_message = 'custom error message'
 
@@ -526,7 +530,7 @@ describe('Matcher', function () {
                 })
             })
 
-            it('should return {pass: Promise<false>, message:string} for non-visible element, when timeout and error message is specified', function (done) {
+            xit('should return {pass: Promise<false>, message:string} for non-visible element, when timeout and error message is specified', function (done) {
                 let elem = new VisibleElement()
                 const custom_timeout = 1000
                 const custom_error_message = 'custom error message'
