@@ -6,16 +6,12 @@ let Jasmine = require('jasmine')
 let jasmineRunner = new Jasmine()
 import matchers from './index'
 
-////////////////// MOCKS //////////////////
+//////////////////////// MOCKS ////////////////////////
 // TODO: Move mocks to separate file
 class MockedBrowser {
     ExpectedConditions = {
-        visibilityOf: (elem) => {
-            return elem.isDisplayed()
-        },
-        invisibilityOf: (elem) => {
-            return elem.isDisplayed()
-        }
+        visibilityOf: (elem) => () => elem.isDisplayed(),
+        invisibilityOf: (elem) => () => !elem.isDisplayed()
     }
 
     wait(condition, timeout) {
@@ -31,14 +27,26 @@ class MockedBrowser {
 class WebElement {
     parentElementArrayFinder
     locator
-    displayed = true
+    displayed
+    attributes = {}
 
     constructor() {
         this.parentElementArrayFinder = { locator_: 'test locator' }
         this.locator = () => this.parentElementArrayFinder.locator_
     }
+
     isDisplayed() {
         return this.displayed
+    }
+
+    getAttribute(atrr: string) {
+        return this.attributes[atrr]
+    }
+
+    /** for unit testing only, does not exist in ElementFinder */
+    setAttribute(name: string, value: string) {
+        this.attributes[name] = value
+        return this
     }
 }
 
@@ -60,17 +68,21 @@ class NonVisibleElement extends Protractor4WebElement {
     displayed = false
 }
 
-var protractor: any = new MockedBrowser()
-////////////////// END MOCKS //////////////////
+// For unittesting, mocking global protractor object
+global['protractor'] = new MockedBrowser()
+declare var protractor: MockedBrowser
 
+//////////////////////// END MOCKS ////////////////////////
 
-describe('Matchers: ', function () {
+describe('Matcher', function () {
     let toAppear = matchers.toAppear()
     let toDisappear = matchers.toDisappear()
+    let toHaveClass = matchers.toHaveClass()
 
     let matchersFunctions = [
         toAppear.compare, toAppear.negativeCompare,
-        toDisappear.compare, toDisappear.negativeCompare
+        toDisappear.compare, toDisappear.negativeCompare,
+        toHaveClass.compare, toHaveClass.negativeCompare
     ]
 
     let nonElementFinders = [
@@ -86,208 +98,453 @@ describe('Matchers: ', function () {
         }
     }))
 
-    it('Should support Protractor >4.x .browser_ attribute', function (done) {
-        var ptor4Element = new Protractor4WebElement()
-        for (let matcher of matchersFunctions) {
-            let wrapp = () => matcher(ptor4Element)
+    matchersFunctions.map(matcher => {
+        it('should support Protractor >4.x .browser_ attribute', function () {
+            let wrapped = () => matcher(new Protractor4WebElement())
+            expect(wrapped).not.toThrowError('Matcher is expected to be applied to ElementFinder object, please make sure that you pass correct object type')
+        })
 
-            expect(wrapp).not.toThrowError('Matcher is expected to be applied to ElementFinder object, please make sure that you pass correct object type')
-            wrapp().pass.then(pass => {
-                expect(pass).toBe(true, 'Expected result.pass to be resolved to true')
-                done()
-            })
-        }
+        it('should support Protractor <4.x .ptor_ attribute', function () {
+            let wrapped = () => matcher(new Protractor3WebElement())
+            expect(wrapped).not.toThrowError('Matcher is expected to be applied to ElementFinder object, please make sure that you pass correct object type')
+        })
     })
 
-    it('Should support Protractor <4.x .ptor_ attribute', function (done) {
-        var ptor3Element = new Protractor3WebElement()
-        for (let matcher of matchersFunctions) {
-            let wrapp = function () {
-                return matcher(ptor3Element)
-            }
-            expect(wrapp).not.toThrowError('Matcher is expected to be applied to ElementFinder object, please make sure that you pass correct object type')
-            wrapp().pass.then(pass => {
-                expect(pass).toBe(true, 'Expected result.pass to be resolved to true')
-                done()
-            })
-        }
-    })
+    describe('toAppear', function () {
 
-    xdescribe('toAppear:', function () {
+        it('should return {pass: Promise<true>} for visible element', function (done) {
+            let result = toAppear.compare(new VisibleElement())
 
-        it('compare should return result object with pass:Promise<boolean>', function (done) {
-            let element = new VisibleElement()
-            let result = toAppear.compare(element)
-
-            result.pass.then(pass => {
-                expect(pass).toBe(true, 'Expected result.pass to be resolved to true')
+            result.pass.then(passvalue => {
+                expect(passvalue).toBeTruthy('Expected result.pass to be resolved to true')
                 expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success')
                 done()
             })
         })
 
-        it('negativeCompare should return result object with pass:Promise<boolean>', function (done) {
-            let element = new NonVisibleElement()
-            let result = toAppear.negativeCompare(element)
-
-            result.pass.then(pass => {
-                expect(pass).toBe(true, 'Expected result.pass to be resolved to true')
-                expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success')
+        it('should return {pass: Promise<false>, message:string} for non-visible element', function (done) {
+            let elem = new NonVisibleElement()
+            let result = toAppear.compare(elem)
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(`Element ${elem.locator()} was expected to be shown in 3000 milliseconds but is NOT visible`, `Expected message to equal default message`)
                 done()
             })
         })
 
-        it('should return failed result object with default message, if not specified', function (done) {
-            let element = new NonVisibleElement()
+        it('should return {pass: Promise<false>, message:string} for non-visible element, when timeout is specified', function (done) {
+            let elem = new NonVisibleElement()
+            const custom_timeout = 1000
+            spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+            let result = toAppear.compare(elem, custom_timeout)
 
-            let result = toAppear.compare(element)
-
-            result.pass.then(() => {
-                expect(result.message).toBe("Element " + element.parentElementArrayFinder.locator_.toString() +
-                    " was expected to be shown in " + 3000 + " milliseconds but is NOT visible",
-                    'Expected message to equal default message')
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(`Element ${elem.locator()} was expected to be shown in ${custom_timeout} milliseconds but is NOT visible`, `Expected message to equal default message`)
+                // Asserting only one call was done. In actual code this also will be once
+                expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
                 done()
             })
         })
 
-        it('should be able to return message object with non-default message and timeout.', function (done) {
-            var element = new WebElement()
-            element.displayed = false
-            let originalWait = function (EC, timeout) {
-                return new Promise((resolve, reject) => reject())
-            }
-            element.browser_.wait = function (EC, timeout) {
-                element.browser_.timeout = timeout
+        it('should return {pass: Promise<false>, message:string} for non-visible element, when error message is specified', function (done) {
+            let elem = new NonVisibleElement()
+            const custom_error_message = 'custom error message'
 
-                return originalWait(EC, timeout)
-            }
-            let result = toAppear.compare(element, 1000, 'test message')
+            spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+            let result = toAppear.compare(elem, custom_error_message)
 
-            result.pass.then(() => {
-                expect(result.message).toBe('test message')
-                expect(element.browser_.timeout).toBe(1000)
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(3000, `Wait function should be called with default timeout - 3000`)
                 done()
             })
         })
 
-        it('should be able to return failed object with message, if only message was provided', function (done) {
-            var element = new WebElement()
-            let originalWait = function (EC, timeout) {
-                return new Promise((resolve, reject) => reject())
-            }
-            element.browser_.wait = function (EC, timeout) {
-                element.browser_.timeout = timeout
-                return originalWait(EC, timeout)
-            }
-            let result = toAppear.compare(element, 'test message')
+        it('should return {pass: Promise<false>, message:string} for non-visible element, when timeout and error message is specified', function (done) {
+            let elem = new NonVisibleElement()
+            const custom_timeout = 1000
+            const custom_error_message = 'custom error message'
 
-            result.pass.then(() => {
-                expect(result.message).toBe('test message')
+            spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+            let result = toAppear.compare(elem, custom_timeout, custom_error_message)
+
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
                 done()
             })
         })
 
-        it('should reject result.pass if wait has failed', function (done) {
-            var element = new WebElement()
-            element.displayed = false
-            element.browser_.wait = function (EC) {
-                return new Promise((resolve, reject) => reject())
-            }
+        describe('with .not', function () {
+            it('should return {pass: Promise<true>} for non-visible element', function (done) {
+                let result = toAppear.negativeCompare(new NonVisibleElement())
 
-            let res = toAppear.compare(element)
-            res.pass.then(result => {
-                expect(result).toBe(false)
-                expect(res.message).toBe('Element test locator was expected to be shown in 3000 milliseconds but is NOT visible')
-                done()
+                result.pass.then(passvalue => {
+                    expect(passvalue).toBeTruthy('Expected result.pass to be resolved to true')
+                    expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success')
+                    done()
+                })
             })
-        })
 
-    })
-
-    xdescribe('toDisappear:', function () {
-
-        it('should return result object with Promise pass, that resolves to true', function (done) {
-            var element = new Element()
-            let result = toDisappear.compare(element)
-
-            result.pass.then(pass => {
-                expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success')
-                expect(pass).toBe(true, 'Expected result.pass to be resolved to true')
-                done()
+            it('should return {pass: Promise<false>, message:string} for visible element', function (done) {
+                let elem = new VisibleElement()
+                let result = toAppear.negativeCompare(elem)
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(`Element ${elem.locator()} was expected NOT to be shown in 3000 milliseconds but is visible`)
+                    done()
+                })
             })
-        })
 
-        it('should return failed result object with default message, if not specified', function (done) {
-            var element = new WebElement()
-            element.displayed = false
-            element.browser_.wait = function (EC) {
-                return new Promise((resolve, reject) => reject())
-            }
-            let result = toDisappear.compare(element)
+            it('should return {pass: Promise<false>, message:string} for visible element, when timeout is specified', function (done) {
+                let elem = new VisibleElement()
+                const custom_timeout = 1000
+                spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+                let result = toAppear.negativeCompare(elem, custom_timeout)
 
-            result.pass.then((pass) => {
-                expect(pass).toBe(false, 'Expected result.pass to be resolved to false')
-                expect(result.message).toBe("Element " + element.parentElementArrayFinder.locator_.toString() +
-                    " was expected NOT to be shown in " + 3000 + " milliseconds but is visible",
-                    'Expected message to equal default message')
-                done()
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(`Element ${elem.locator()} was expected NOT to be shown in ${custom_timeout} milliseconds but is visible`)
+                    // Asserting only one call was done. In actual code this also will be once
+                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                    expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                    done()
+                })
             })
-        })
 
-        it('should be able to return message object with non-default message and timeout.', function (done) {
-            var element = new WebElement()
-            let originalWait = function (EC, timeout) {
-                return new Promise((resolve, reject) => reject())
-            }
-            element.browser_.wait = function (EC, timeout) {
-                element.browser_.timeout = timeout
-                return originalWait(EC, timeout)
-            }
-            let result = toDisappear.compare(element, 1000, 'test message')
+            it('should return {pass: Promise<false>, message:string} for visible element, when error message is specified', function (done) {
+                let elem = new VisibleElement()
+                const custom_error_message = 'custom error message'
 
-            result.pass.then((pass) => {
-                expect(pass).toBe(false, 'Expected result.pass to be resolved to false')
-                expect(result.message).toBe('test message')
-                expect(element.browser_.timeout).toBe(1000)
-                done()
+                spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+                let result = toAppear.negativeCompare(elem, custom_error_message)
+
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                    expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(3000, `Wait function should be called with default timeout - 3000`)
+                    done()
+                })
             })
-        })
 
-        it('should be able to return message object, if only message was provided', function (done) {
-            var element = new WebElement()
-            let originalWait = function (EC, timeout) {
-                return new Promise((resolve, reject) => reject())
-            }
-            element.browser_.wait = function (EC, timeout) {
-                element.browser_.timeout = timeout
-                return originalWait(EC, timeout)
-            }
-            let result = toDisappear.compare(element, 'test message')
+            it('should return {pass: Promise<false>, message:string} for visible element, when timeout and error message is specified', function (done) {
+                let elem = new VisibleElement()
+                const custom_timeout = 1000
+                const custom_error_message = 'custom error message'
 
-            result.pass.then((pass) => {
-                expect(pass).toBe(false, 'Expected result.pass to be resolved to false')
-                expect(result.message).toBe('test message')
-                done()
-            })
-        })
+                spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+                let result = toAppear.negativeCompare(elem, custom_timeout, custom_error_message)
 
-        it('should reject result.pass if wait has failed', function (done) {
-            var element = new WebElement()
-            element.displayed = false
-            element.browser_.wait = function (EC) {
-                return new Promise((resolve, reject) => reject())
-            }
-
-            let res = toDisappear.compare(element)
-            res.pass.then(result => {
-                expect(result).toBe(false)
-                expect(res.message).toBe('Element test locator was expected NOT to be shown in 3000 milliseconds but is visible')
-                done()
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                    expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                    done()
+                })
             })
         })
 
     })
 
+    describe('toDisappear:', function () {
+        it('should return {pass: Promise<true>} for non-visible element', function (done) {
+            let result = toDisappear.compare(new NonVisibleElement())
+
+            result.pass.then(passvalue => {
+                expect(passvalue).toBeTruthy('Expected result.pass to be resolved to true')
+                expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success')
+                done()
+            })
+        })
+
+        it('should return {pass: Promise<false>, message:string} for visible element', function (done) {
+            let elem = new VisibleElement()
+            let result = toDisappear.compare(elem)
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(`Element ${elem.locator()} was expected NOT to be shown in 3000 milliseconds but is visible`)
+                done()
+            })
+        })
+
+        it('should return {pass: Promise<false>, message:string} for visible element, when timeout is specified', function (done) {
+            let elem = new VisibleElement()
+            const custom_timeout = 1000
+            spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+            let result = toDisappear.compare(elem, custom_timeout)
+
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(`Element ${elem.locator()} was expected NOT to be shown in ${custom_timeout} milliseconds but is visible`)
+                // Asserting only one call was done. In actual code this also will be once
+                expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                done()
+            })
+        })
+
+        it('should return {pass: Promise<false>, message:string} for visible element, when error message is specified', function (done) {
+            let elem = new VisibleElement()
+            const custom_error_message = 'custom error message'
+
+            spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+            let result = toDisappear.compare(elem, custom_error_message)
+
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(3000, `Wait function should be called with default timeout - 3000`)
+                done()
+            })
+        })
+
+        it('should return {pass: Promise<false>, message:string} for visible element, when timeout and error message is specified', function (done) {
+            let elem = new VisibleElement()
+            const custom_timeout = 1000
+            const custom_error_message = 'custom error message'
+
+            spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+            let result = toDisappear.compare(elem, custom_timeout, custom_error_message)
+
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                done()
+            })
+        })
+
+        describe('with .not', function () {
+            it('should return {pass: Promise<true>} for visible element', function (done) {
+                let result = toDisappear.negativeCompare(new VisibleElement())
+
+                result.pass.then(passvalue => {
+                    expect(passvalue).toBeTruthy('Expected result.pass to be resolved to true')
+                    expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success')
+                    done()
+                })
+            })
+
+            it('should return {pass: Promise<false>, message:string} for non-visible element', function (done) {
+                let elem = new NonVisibleElement()
+                let result = toDisappear.negativeCompare(elem)
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(`Element ${elem.locator()} was expected to be shown in 3000 milliseconds but is NOT visible`, `Expected message to equal default message`)
+                    done()
+                })
+            })
+
+            it('should return {pass: Promise<false>, message:string} for non-visible element, when timeout is specified', function (done) {
+                let elem = new NonVisibleElement()
+                const custom_timeout = 1000
+                spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+                let result = toDisappear.negativeCompare(elem, custom_timeout)
+
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(`Element ${elem.locator()} was expected to be shown in ${custom_timeout} milliseconds but is NOT visible`, `Expected message to equal default message`)
+                    // Asserting only one call was done. In actual code this also will be once
+                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                    expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                    done()
+                })
+            })
+
+            it('should return {pass: Promise<false>, message:string} for non-visible element, when error message is specified', function (done) {
+                let elem = new NonVisibleElement()
+                const custom_error_message = 'custom error message'
+
+                spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+                let result = toDisappear.negativeCompare(elem, custom_error_message)
+
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                    expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(3000, `Wait function should be called with default timeout - 3000`)
+                    done()
+                })
+            })
+
+            it('should return {pass: Promise<false>, message:string} for non-visible element, when timeout and error message is specified', function (done) {
+                let elem = new NonVisibleElement()
+                const custom_timeout = 1000
+                const custom_error_message = 'custom error message'
+
+                spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+                let result = toDisappear.negativeCompare(elem, custom_timeout, custom_error_message)
+
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                    expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                    done()
+                })
+            })
+
+        })
+    })
+
+    describe('toHaveClass:', function () {
+        it('should have required className argument, and throw error if not passed', function () {
+            let wrapped = () => toHaveClass.compare(new VisibleElement(), undefined)
+
+            expect(wrapped).toThrowError(`parameter 'className' waiting for String argument but received Undefined`)
+        })
+
+        it('should return {pass: Promise<true>} for element with specified class', function (done) {
+            let result = toHaveClass.compare(new VisibleElement().setAttribute('class', 'test'), 'test')
+
+            result.pass.then(passvalue => {
+                expect(passvalue).toBeTruthy('Expected result.pass to be resolved to true')
+                expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success')
+                done()
+            })
+        })
+
+        xit('should return {pass: Promise<false>, message:string} for visible element', function (done) {
+            let elem = new VisibleElement()
+            let result = toDisappear.compare(elem)
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(`Element ${elem.locator()} was expected NOT to be shown in 3000 milliseconds but is visible`)
+                done()
+            })
+        })
+
+        xit('should return {pass: Promise<false>, message:string} for visible element, when timeout is specified', function (done) {
+            let elem = new VisibleElement()
+            const custom_timeout = 1000
+            spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+            let result = toDisappear.compare(elem, custom_timeout)
+
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(`Element ${elem.locator()} was expected NOT to be shown in ${custom_timeout} milliseconds but is visible`)
+                // Asserting only one call was done. In actual code this also will be once
+                expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                done()
+            })
+        })
+
+        xit('should return {pass: Promise<false>, message:string} for visible element, when error message is specified', function (done) {
+            let elem = new VisibleElement()
+            const custom_error_message = 'custom error message'
+
+            spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+            let result = toDisappear.compare(elem, custom_error_message)
+
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(3000, `Wait function should be called with default timeout - 3000`)
+                done()
+            })
+        })
+
+        xit('should return {pass: Promise<false>, message:string} for visible element, when timeout and error message is specified', function (done) {
+            let elem = new VisibleElement()
+            const custom_timeout = 1000
+            const custom_error_message = 'custom error message'
+
+            spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+            let result = toDisappear.compare(elem, custom_timeout, custom_error_message)
+
+            result.pass.then((passvalue) => {
+                expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                done()
+            })
+        })
+
+        xdescribe('with .not', function () {
+            it('should return {pass: Promise<true>} for visible element', function (done) {
+                let result = toDisappear.negativeCompare(new VisibleElement())
+
+                result.pass.then(passvalue => {
+                    expect(passvalue).toBeTruthy('Expected result.pass to be resolved to true')
+                    expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success')
+                    done()
+                })
+            })
+
+            it('should return {pass: Promise<false>, message:string} for non-visible element', function (done) {
+                let elem = new VisibleElement()
+                let result = toDisappear.negativeCompare(elem)
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(`Element ${elem.locator()} was expected to be shown in 3000 milliseconds but is NOT visible`, `Expected message to equal default message`)
+                    done()
+                })
+            })
+
+            it('should return {pass: Promise<false>, message:string} for non-visible element, when timeout is specified', function (done) {
+                let elem = new VisibleElement()
+                const custom_timeout = 1000
+                spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+                let result = toDisappear.negativeCompare(elem, custom_timeout)
+
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(`Element ${elem.locator()} was expected to be shown in ${custom_timeout} milliseconds but is NOT visible`, `Expected message to equal default message`)
+                    // Asserting only one call was done. In actual code this also will be once
+                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                    expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                    done()
+                })
+            })
+
+            it('should return {pass: Promise<false>, message:string} for non-visible element, when error message is specified', function (done) {
+                let elem = new VisibleElement()
+                const custom_error_message = 'custom error message'
+
+                spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+                let result = toDisappear.negativeCompare(elem, custom_error_message)
+
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                    expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(3000, `Wait function should be called with default timeout - 3000`)
+                    done()
+                })
+            })
+
+            it('should return {pass: Promise<false>, message:string} for non-visible element, when timeout and error message is specified', function (done) {
+                let elem = new VisibleElement()
+                const custom_timeout = 1000
+                const custom_error_message = 'custom error message'
+
+                spyOn(elem.browser_, 'wait').and.callThrough() // To detect what timeout was used
+                let result = toDisappear.negativeCompare(elem, custom_timeout, custom_error_message)
+
+                result.pass.then((passvalue) => {
+                    expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false')
+                    expect(result.message).toBe(custom_error_message, `Expected message to equal custom error message`)
+                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1)
+                    expect((elem.browser_.wait as any).calls.argsFor(0)[1]).toBe(custom_timeout, `Wait function should be called with custom timeout - ${custom_timeout}`)
+                    done()
+                })
+            })
+
+        })
+    })
 })
 
 jasmineRunner.execute(['test.js'])
