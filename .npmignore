@@ -1,3 +1,6 @@
-# Excluding tests from final npm package
+# Excluding tests
 built/test.js
-test.ts
+# Excluding .ts from final npm package
+*.ts
+# Including typings explicitly
+!index.d.ts
