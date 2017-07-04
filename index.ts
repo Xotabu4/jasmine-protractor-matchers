@@ -1,7 +1,7 @@
 let argumentsToObject = require('arguejs') // Nice! https://github.com/zvictor/ArgueJS
 
 // Global peer dependency - protractor
-declare var protractor: any
+declare var protractor: MockedBrowser
 
 interface CustomMatcherResultPromised {
     pass: Promise<boolean>
@@ -42,8 +42,7 @@ class Matcher {
                 return this.options.negativeCompareFunc(argumentsObject)
             }
         }
-        // Requires to be a function
-        return () => jasmineFormattedMatcher
+        return jasmineFormattedMatcher
     }
 
     private prepareArgumentsObject(args) {
@@ -87,10 +86,7 @@ class Helpers {
     }
 }
 
-//////////////////////// EXPORT ////////////////////////
-
-// Exporting matchers in format that applicable for Jasminejs to import.
-export default {
+class Matchers {
     /**
      * Matcher for asserting that element is present and visible.
      * Should be applied to ElementFinder object only.
@@ -98,39 +94,41 @@ export default {
      * [timeout=3000] - Timeout to wait for appear of element in milliseconds.|
      * [message='Element ELEMENT_LOCATOR was expected to be shown in TIMEOUT milliseconds but is NOT visible'] Custom error message to throw on assertion failure.
      */
-    toAppear: new Matcher({
-        argumentsSignature: { elem: Object, browsr: Object, timeout: [Number, 3000], message: [String] },
-        compareFunc: (argsObj) => {
-            let result: CustomMatcherResultPromised = {
-                pass: undefined,
-                message: undefined
+    toAppear() {
+        return new Matcher({
+            argumentsSignature: { elem: Object, browsr: Object, timeout: [Number, 3000], message: [String] },
+            compareFunc: (argsObj) => {
+                let result: CustomMatcherResultPromised = {
+                    pass: undefined,
+                    message: undefined
+                }
+
+                result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.visibilityOf(argsObj.elem), argsObj.timeout)
+                    .then(() => true,
+                    err => {
+                        result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected to be shown in ${argsObj.timeout} milliseconds but is NOT visible`
+                        return false
+                    })
+                return result
+            },
+            negativeCompareFunc: (argsObj) => {
+                // Identical to toDisappear() matcher
+
+                let result: CustomMatcherResultPromised = {
+                    pass: undefined,
+                    message: undefined
+                }
+
+                result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.invisibilityOf(argsObj.elem), argsObj.timeout)
+                    .then(() => true,
+                    err => {
+                        result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected NOT to be shown in ${argsObj.timeout} milliseconds but is visible`
+                        return false
+                    })
+                return result
             }
-
-            result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.visibilityOf(argsObj.elem), argsObj.timeout)
-                .then(() => true,
-                err => {
-                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected to be shown in ${argsObj.timeout} milliseconds but is NOT visible`
-                    return false
-                })
-            return result
-        },
-        negativeCompareFunc: (argsObj) => {
-            // Identical to toDisappear() matcher
-
-            let result: CustomMatcherResultPromised = {
-                pass: undefined,
-                message: undefined
-            }
-
-            result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.invisibilityOf(argsObj.elem), argsObj.timeout)
-                .then(() => true,
-                err => {
-                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected NOT to be shown in ${argsObj.timeout} milliseconds but is visible`
-                    return false
-                })
-            return result
-        }
-    }).build(),
+        }).build()
+    }
 
     /**
      * Matcher for asserting that element is not displayed on the page.
@@ -139,39 +137,41 @@ export default {
      * [timeout=3000] - Timeout to wait for disappear of element in milliseconds.|
      * [message='Element ELEMENT_LOCATOR was expected NOT to be shown in TIMEOUT milliseconds but is visible'] Custom error message to throw on assertion failure.
      */
-    toDisappear: new Matcher({
-        argumentsSignature: { elem: Object, browsr: Object, timeout: [Number, 3000], message: [String] },
-        compareFunc: (argsObj) => {
-            let result: CustomMatcherResultPromised = {
-                pass: undefined,
-                message: undefined
+    toDisappear() {
+        return new Matcher({
+            argumentsSignature: { elem: Object, browsr: Object, timeout: [Number, 3000], message: [String] },
+            compareFunc: (argsObj) => {
+                let result: CustomMatcherResultPromised = {
+                    pass: undefined,
+                    message: undefined
+                }
+
+                result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.invisibilityOf(argsObj.elem), argsObj.timeout)
+                    .then(() => true,
+                    err => {
+                        result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected NOT to be shown in ${argsObj.timeout} milliseconds but is visible`
+                        return false
+                    })
+                return result
+            },
+            negativeCompareFunc: (argsObj) => {
+                // Identical to toAppear() matcher
+
+                let result: CustomMatcherResultPromised = {
+                    pass: undefined,
+                    message: undefined
+                }
+
+                result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.visibilityOf(argsObj.elem), argsObj.timeout)
+                    .then(() => true,
+                    err => {
+                        result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected to be shown in ${argsObj.timeout} milliseconds but is NOT visible`
+                        return false
+                    })
+                return result
             }
-
-            result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.invisibilityOf(argsObj.elem), argsObj.timeout)
-                .then(() => true,
-                err => {
-                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected NOT to be shown in ${argsObj.timeout} milliseconds but is visible`
-                    return false
-                })
-            return result
-        },
-        negativeCompareFunc: (argsObj) => {
-            // Identical to toAppear() matcher
-
-            let result: CustomMatcherResultPromised = {
-                pass: undefined,
-                message: undefined
-            }
-
-            result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.visibilityOf(argsObj.elem), argsObj.timeout)
-                .then(() => true,
-                err => {
-                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected to be shown in ${argsObj.timeout} milliseconds but is NOT visible`
-                    return false
-                })
-            return result
-        }
-    }).build(),
+        }).build()
+    }
 
     /**
      * Matcher for asserting that element class attribute has specified class name.
@@ -182,35 +182,43 @@ export default {
      * [timeout=3000] - Timeout to wait for class name to appear in class attribute in milliseconds.
      * [message='`Element ${argsObj.elem.locator()} was expected to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it doesnt`'] Custom error message to throw on assertion failure.
      */
-    toHaveClass: new Matcher({
-        argumentsSignature: { elem: Object, browsr: Object, className: String, timeout: [Number, 3000], message: [String] },
-        compareFunc: (argsObj) => {
-            let result: CustomMatcherResultPromised = {
-                pass: undefined,
-                message: undefined
-            }
+    toHaveClass() {
+        return new Matcher({
+            argumentsSignature: { elem: Object, browsr: Object, className: String, timeout: [Number, 3000], message: [String] },
+            compareFunc: (argsObj) => {
+                let result: CustomMatcherResultPromised = {
+                    pass: undefined,
+                    message: undefined
+                }
 
-            result.pass = argsObj.browsr.wait(() => Helpers.hasClass(argsObj.elem, argsObj.className), argsObj.timeout)
-                .then(() => true,
-                err => {
-                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it doesnt`
-                    return false
-                })
-            return result
-        },
-        negativeCompareFunc: (argsObj) => {
-            let result: CustomMatcherResultPromised = {
-                pass: undefined,
-                message: undefined
-            }
+                result.pass = argsObj.browsr.wait(() => Helpers.hasClass(argsObj.elem, argsObj.className), argsObj.timeout)
+                    .then(() => true,
+                    err => {
+                        result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it doesnt`
+                        return false
+                    })
+                return result
+            },
+            negativeCompareFunc: (argsObj) => {
+                let result: CustomMatcherResultPromised = {
+                    pass: undefined,
+                    message: undefined
+                }
 
-            result.pass = argsObj.browsr.wait(() => Helpers.hasNoClass(argsObj.elem, argsObj.className), argsObj.timeout)
-                .then(() => true,
-                err => {
-                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected NOT to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it does`
-                    return false
-                })
-            return result
-        }
-    }).build()
+                result.pass = argsObj.browsr.wait(() => Helpers.hasNoClass(argsObj.elem, argsObj.className), argsObj.timeout)
+                    .then(() => true,
+                    err => {
+                        result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected NOT to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it does`
+                        return false
+                    })
+                return result
+            }
+        }).build()
+    }
 }
+
+//////////////////////// EXPORT ////////////////////////
+// Had to switch back to `let matchers = require('jasmine-protractor-matchers')`
+// due to default ES6 exports that wrapp everything into 'default' key. 
+// TODO: Fix exports to support ES6 import matchers from 'jasmine-protractor-matchers'
+module.exports = new Matchers();

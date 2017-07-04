@@ -1,5 +1,3 @@
-"use strict";
-exports.__esModule = true;
 var argumentsToObject = require('arguejs'); // Nice! https://github.com/zvictor/ArgueJS
 var Matcher = (function () {
     function Matcher(options) {
@@ -29,8 +27,7 @@ var Matcher = (function () {
                 return _this.options.negativeCompareFunc(argumentsObject);
             }
         };
-        // Requires to be a function
-        return function () { return jasmineFormattedMatcher; };
+        return jasmineFormattedMatcher;
     };
     Matcher.prototype.prepareArgumentsObject = function (args) {
         var elem = args[0];
@@ -71,9 +68,9 @@ var Helpers = (function () {
     };
     return Helpers;
 }());
-//////////////////////// EXPORT ////////////////////////
-// Exporting matchers in format that applicable for Jasminejs to import.
-exports["default"] = {
+var Matchers = (function () {
+    function Matchers() {
+    }
     /**
      * Matcher for asserting that element is present and visible.
      * Should be applied to ElementFinder object only.
@@ -81,34 +78,36 @@ exports["default"] = {
      * [timeout=3000] - Timeout to wait for appear of element in milliseconds.|
      * [message='Element ELEMENT_LOCATOR was expected to be shown in TIMEOUT milliseconds but is NOT visible'] Custom error message to throw on assertion failure.
      */
-    toAppear: new Matcher({
-        argumentsSignature: { elem: Object, browsr: Object, timeout: [Number, 3000], message: [String] },
-        compareFunc: function (argsObj) {
-            var result = {
-                pass: undefined,
-                message: undefined
-            };
-            result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.visibilityOf(argsObj.elem), argsObj.timeout)
-                .then(function () { return true; }, function (err) {
-                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected to be shown in " + argsObj.timeout + " milliseconds but is NOT visible";
-                return false;
-            });
-            return result;
-        },
-        negativeCompareFunc: function (argsObj) {
-            // Identical to toDisappear() matcher
-            var result = {
-                pass: undefined,
-                message: undefined
-            };
-            result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.invisibilityOf(argsObj.elem), argsObj.timeout)
-                .then(function () { return true; }, function (err) {
-                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected NOT to be shown in " + argsObj.timeout + " milliseconds but is visible";
-                return false;
-            });
-            return result;
-        }
-    }).build(),
+    Matchers.prototype.toAppear = function () {
+        return new Matcher({
+            argumentsSignature: { elem: Object, browsr: Object, timeout: [Number, 3000], message: [String] },
+            compareFunc: function (argsObj) {
+                var result = {
+                    pass: undefined,
+                    message: undefined
+                };
+                result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.visibilityOf(argsObj.elem), argsObj.timeout)
+                    .then(function () { return true; }, function (err) {
+                    result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected to be shown in " + argsObj.timeout + " milliseconds but is NOT visible";
+                    return false;
+                });
+                return result;
+            },
+            negativeCompareFunc: function (argsObj) {
+                // Identical to toDisappear() matcher
+                var result = {
+                    pass: undefined,
+                    message: undefined
+                };
+                result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.invisibilityOf(argsObj.elem), argsObj.timeout)
+                    .then(function () { return true; }, function (err) {
+                    result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected NOT to be shown in " + argsObj.timeout + " milliseconds but is visible";
+                    return false;
+                });
+                return result;
+            }
+        }).build();
+    };
     /**
      * Matcher for asserting that element is not displayed on the page.
      * Should be applied to ElementFinder object only.
@@ -116,34 +115,36 @@ exports["default"] = {
      * [timeout=3000] - Timeout to wait for disappear of element in milliseconds.|
      * [message='Element ELEMENT_LOCATOR was expected NOT to be shown in TIMEOUT milliseconds but is visible'] Custom error message to throw on assertion failure.
      */
-    toDisappear: new Matcher({
-        argumentsSignature: { elem: Object, browsr: Object, timeout: [Number, 3000], message: [String] },
-        compareFunc: function (argsObj) {
-            var result = {
-                pass: undefined,
-                message: undefined
-            };
-            result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.invisibilityOf(argsObj.elem), argsObj.timeout)
-                .then(function () { return true; }, function (err) {
-                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected NOT to be shown in " + argsObj.timeout + " milliseconds but is visible";
-                return false;
-            });
-            return result;
-        },
-        negativeCompareFunc: function (argsObj) {
-            // Identical to toAppear() matcher
-            var result = {
-                pass: undefined,
-                message: undefined
-            };
-            result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.visibilityOf(argsObj.elem), argsObj.timeout)
-                .then(function () { return true; }, function (err) {
-                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected to be shown in " + argsObj.timeout + " milliseconds but is NOT visible";
-                return false;
-            });
-            return result;
-        }
-    }).build(),
+    Matchers.prototype.toDisappear = function () {
+        return new Matcher({
+            argumentsSignature: { elem: Object, browsr: Object, timeout: [Number, 3000], message: [String] },
+            compareFunc: function (argsObj) {
+                var result = {
+                    pass: undefined,
+                    message: undefined
+                };
+                result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.invisibilityOf(argsObj.elem), argsObj.timeout)
+                    .then(function () { return true; }, function (err) {
+                    result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected NOT to be shown in " + argsObj.timeout + " milliseconds but is visible";
+                    return false;
+                });
+                return result;
+            },
+            negativeCompareFunc: function (argsObj) {
+                // Identical to toAppear() matcher
+                var result = {
+                    pass: undefined,
+                    message: undefined
+                };
+                result.pass = argsObj.browsr.wait(protractor.ExpectedConditions.visibilityOf(argsObj.elem), argsObj.timeout)
+                    .then(function () { return true; }, function (err) {
+                    result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected to be shown in " + argsObj.timeout + " milliseconds but is NOT visible";
+                    return false;
+                });
+                return result;
+            }
+        }).build();
+    };
     /**
      * Matcher for asserting that element class attribute has specified class name.
      *
@@ -153,31 +154,37 @@ exports["default"] = {
      * [timeout=3000] - Timeout to wait for class name to appear in class attribute in milliseconds.
      * [message='`Element ${argsObj.elem.locator()} was expected to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it doesnt`'] Custom error message to throw on assertion failure.
      */
-    toHaveClass: new Matcher({
-        argumentsSignature: { elem: Object, browsr: Object, className: String, timeout: [Number, 3000], message: [String] },
-        compareFunc: function (argsObj) {
-            var result = {
-                pass: undefined,
-                message: undefined
-            };
-            result.pass = argsObj.browsr.wait(function () { return Helpers.hasClass(argsObj.elem, argsObj.className); }, argsObj.timeout)
-                .then(function () { return true; }, function (err) {
-                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected to have class \"" + argsObj.className + "\" in " + argsObj.timeout + " milliseconds, but it doesnt";
-                return false;
-            });
-            return result;
-        },
-        negativeCompareFunc: function (argsObj) {
-            var result = {
-                pass: undefined,
-                message: undefined
-            };
-            result.pass = argsObj.browsr.wait(function () { return Helpers.hasNoClass(argsObj.elem, argsObj.className); }, argsObj.timeout)
-                .then(function () { return true; }, function (err) {
-                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected NOT to have class \"" + argsObj.className + "\" in " + argsObj.timeout + " milliseconds, but it does";
-                return false;
-            });
-            return result;
-        }
-    }).build()
-};
+    Matchers.prototype.toHaveClass = function () {
+        return new Matcher({
+            argumentsSignature: { elem: Object, browsr: Object, className: String, timeout: [Number, 3000], message: [String] },
+            compareFunc: function (argsObj) {
+                var result = {
+                    pass: undefined,
+                    message: undefined
+                };
+                result.pass = argsObj.browsr.wait(function () { return Helpers.hasClass(argsObj.elem, argsObj.className); }, argsObj.timeout)
+                    .then(function () { return true; }, function (err) {
+                    result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected to have class \"" + argsObj.className + "\" in " + argsObj.timeout + " milliseconds, but it doesnt";
+                    return false;
+                });
+                return result;
+            },
+            negativeCompareFunc: function (argsObj) {
+                var result = {
+                    pass: undefined,
+                    message: undefined
+                };
+                result.pass = argsObj.browsr.wait(function () { return Helpers.hasNoClass(argsObj.elem, argsObj.className); }, argsObj.timeout)
+                    .then(function () { return true; }, function (err) {
+                    result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected NOT to have class \"" + argsObj.className + "\" in " + argsObj.timeout + " milliseconds, but it does";
+                    return false;
+                });
+                return result;
+            }
+        }).build();
+    };
+    return Matchers;
+}());
+//////////////////////// EXPORT ////////////////////////
+// Exporting matchers in format that applicable for Jasminejs to import.
+module.exports = new Matchers();

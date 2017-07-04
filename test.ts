@@ -4,8 +4,7 @@
  */
 let Jasmine = require('jasmine')
 let jasmineRunner = new Jasmine()
-import matchers from './index'
-
+let matchers = require('./index')
 declare let Promise: any
 
 //////////////////////// MOCKS ////////////////////////

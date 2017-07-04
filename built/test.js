@@ -1,4 +1,3 @@
-"use strict";
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
@@ -9,14 +8,13 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-exports.__esModule = true;
 /*
  * Created by xotabu4 on 21.03.2016
  * gihub.com/xotabu4
  */
 var Jasmine = require('jasmine');
 var jasmineRunner = new Jasmine();
-var index_1 = require("./index");
+var matchers = require('./index');
 //////////////////////// MOCKS ////////////////////////
 // TODO: Move mocks to separate file
 var MockedBrowser = (function () {
@@ -114,9 +112,9 @@ var NonVisibleElement = (function (_super) {
 global['protractor'] = new MockedBrowser();
 //////////////////////// END MOCKS ////////////////////////
 describe('Matcher', function () {
-    var toAppear = index_1["default"].toAppear();
-    var toDisappear = index_1["default"].toDisappear();
-    var toHaveClass = index_1["default"].toHaveClass();
+    var toAppear = matchers.toAppear();
+    var toDisappear = matchers.toDisappear();
+    var toHaveClass = matchers.toHaveClass();
     var matchersFunctions = [
         toAppear.compare, toAppear.negativeCompare,
         toDisappear.compare, toDisappear.negativeCompare,
