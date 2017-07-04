@@ -35,5 +35,15 @@ declare module jasmine {
          * @param {string} custom_error_message Custom error message to throw on assertion failure. Default message is - 'Element ELEMENT_LOCATOR was expected NOT to be shown in TIMEOUT milliseconds but is visible'
          */
         toDisappear(custom_error_message?: string): boolean;
+
+        /**
+         * Matcher for asserting that element class attribute has specified class name.
+         * Should be applied to ElementFinder object only.
+         * 
+         * @param {string} className class name to assert in class attribute
+         * @param {number} timeout Timeout to wait for class name to appear in class attribute in milliseconds.
+         * @param {string} custom_error_message Custom error message to throw on assertion failure. Default message is - `Element ${elem.locator()} was expected to have class "${className}" in ${timeout} milliseconds, but it doesnt`
+         */
+        toHaveClass(className: string, timeout?: number, custom_error_message?: string): boolean;
     }
 }

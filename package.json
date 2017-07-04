@@ -2,7 +2,7 @@
   "name": "jasmine-protractor-matchers",
   "version": "2.0.0",
   "description": "Collection of additional jasmine matchers, that is useful for those who develop e2e tests using protractor",
-  "main": "index.js",
+  "main": "built/index.js",
   "types": "index.d.ts",
   "scripts": {
     "pretest": "tsc",
@@ -32,7 +32,9 @@
     "@types/jasmine": "^2.5.38",
     "@types/node": "^7.0.12",
     "jasmine": "^2.5.0",
-    "typescript": "2.4.1",
+    "typescript": "2.4.1"
+  },
+  "dependencies": {
     "arguejs": "0.2.3"
   }
 }

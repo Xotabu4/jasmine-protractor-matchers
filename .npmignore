@@ -1,0 +1,3 @@
+# Excluding tests from final npm package
+built/test.js
+test.ts

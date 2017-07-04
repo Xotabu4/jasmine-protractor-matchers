@@ -180,7 +180,7 @@ export default {
      * Optional Parameters:
      * className - Required, class name to assert in class attribute
      * [timeout=3000] - Timeout to wait for class name to appear in class attribute in milliseconds.
-     * [message=''] Custom error message to throw on assertion failure.
+     * [message='`Element ${argsObj.elem.locator()} was expected to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it doesnt`'] Custom error message to throw on assertion failure.
      */
     toHaveClass: new Matcher({
         argumentsSignature: { elem: Object, browsr: Object, className: String, timeout: [Number, 3000], message: [String] },
