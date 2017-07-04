@@ -73,7 +73,8 @@ class Matcher {
 }
 class Helpers {
     static hasClass(elem: IElementFinder, classString: string) {
-        return elem.getAttribute('class').then(classes => {
+        let classatr = elem.getAttribute('class')
+        return classatr.then(classes => {
             // splitting to avoid false positive 'inactiveGrayed inactive'.indexOf('active') !== -1
             let classesArr = classes.split(' ');
             return classesArr.indexOf(classString) !== -1
@@ -192,7 +193,7 @@ export default {
             result.pass = argsObj.browsr.wait(() => Helpers.hasClass(argsObj.elem, argsObj.className), argsObj.timeout)
                 .then(() => true,
                 err => {
-                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected to have class ${argsObj.className} in ${argsObj.timeout}, but it doesnt`
+                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it doesnt`
                     return false
                 })
             return result
@@ -206,7 +207,7 @@ export default {
             result.pass = argsObj.browsr.wait(() => Helpers.hasNoClass(argsObj.elem, argsObj.className), argsObj.timeout)
                 .then(() => true,
                 err => {
-                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected NOT to have class ${argsObj.className} in ${argsObj.timeout}, but it does`
+                    result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected NOT to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it does`
                     return false
                 })
             return result

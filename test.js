@@ -28,6 +28,17 @@ var MockedBrowser = (function () {
     }
     MockedBrowser.prototype.wait = function (condition, timeout) {
         var conditionResult = condition();
+        // If condition returns promise - returning new resolved/rejected promise
+        if (conditionResult.then) {
+            return conditionResult.then(function (res) {
+                if (res === true) {
+                    return Promise.resolve(res);
+                }
+                else if (res === false) {
+                    return Promise.reject(res);
+                }
+            });
+        }
         if (conditionResult === true) {
             return Promise.resolve(conditionResult);
         }
@@ -48,12 +59,16 @@ var WebElement = (function () {
         return this.displayed;
     };
     WebElement.prototype.getAttribute = function (atrr) {
-        return this.attributes[atrr];
+        if (this.attributes[atrr]) {
+            return Promise.resolve(this.attributes[atrr]);
+        }
+        else {
+            return Promise.resolve(null);
+        }
     };
     /** for unit testing only, does not exist in ElementFinder */
     WebElement.prototype.setAttribute = function (name, value) {
         this.attributes[name] = value;
-        return this;
     };
     return WebElement;
 }());
@@ -378,123 +393,126 @@ describe('Matcher', function () {
             var wrapped = function () { return toHaveClass.compare(new VisibleElement(), undefined); };
             expect(wrapped).toThrowError("parameter 'className' waiting for String argument but received Undefined");
         });
-        xit('should return {pass: Promise<true>} for element with specified class', function (done) {
-            var result = toHaveClass.compare(new VisibleElement().setAttribute('class', 'test'), 'test');
+        it('should return {pass: Promise<true>} for element with specified class', function (done) {
+            var elem = new VisibleElement();
+            elem.setAttribute('class', 'test');
+            var result = toHaveClass.compare(elem, 'test');
             result.pass.then(function (passvalue) {
                 expect(passvalue).toBeTruthy('Expected result.pass to be resolved to true');
                 expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success');
                 done();
             });
         });
-        // TODO: Tottaly not ready, even names are copypasted and nothing changed
-        xit('should return {pass: Promise<false>, message:string} for visible element', function (done) {
+        it('should return {pass: Promise<false>, message:string} for element without specified class', function (done) {
             var elem = new VisibleElement();
-            var result = toDisappear.compare(elem);
+            elem.setAttribute('class', 'nonexist');
+            var result = toHaveClass.compare(elem, 'test');
             result.pass.then(function (passvalue) {
                 expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false');
-                expect(result.message).toBe("Element " + elem.locator() + " was expected NOT to be shown in 3000 milliseconds but is visible");
+                expect(result.message).toBe("Element " + elem.locator() + " was expected to have class \"test\" in 3000 milliseconds, but it doesnt");
                 done();
             });
         });
-        // TODO: Tottaly not ready, even names are copypasted and nothing changed
-        xit('should return {pass: Promise<false>, message:string} for visible element, when timeout is specified', function (done) {
+        it('should return {pass: Promise<false>, message:string} for element without specified class, when timeout specified', function (done) {
             var elem = new VisibleElement();
             var custom_timeout = 1000;
             spyOn(elem.browser_, 'wait').and.callThrough(); // To detect what timeout was used
-            var result = toDisappear.compare(elem, custom_timeout);
+            elem.setAttribute('class', 'nonexist');
+            var result = toHaveClass.compare(elem, 'test', custom_timeout);
             result.pass.then(function (passvalue) {
                 expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false');
-                expect(result.message).toBe("Element " + elem.locator() + " was expected NOT to be shown in " + custom_timeout + " milliseconds but is visible");
+                expect(result.message).toBe("Element " + elem.locator() + " was expected to have class \"test\" in " + custom_timeout + " milliseconds, but it doesnt");
                 // Asserting only one call was done. In actual code this also will be once
                 expect(elem.browser_.wait).toHaveBeenCalledTimes(1);
                 expect(elem.browser_.wait.calls.argsFor(0)[1]).toBe(custom_timeout, "Wait function should be called with custom timeout - " + custom_timeout);
                 done();
             });
         });
-        // TODO: Tottaly not ready, even names are copypasted and nothing changed
-        xit('should return {pass: Promise<false>, message:string} for visible element, when error message is specified', function (done) {
+        it('should return {pass: Promise<false>, message:string} for element without specified class, when error message is specified', function (done) {
             var elem = new VisibleElement();
-            var custom_error_message = 'custom error message';
-            spyOn(elem.browser_, 'wait').and.callThrough(); // To detect what timeout was used
-            var result = toDisappear.compare(elem, custom_error_message);
+            elem.setAttribute('class', 'nonexist');
+            var result = toHaveClass.compare(elem, 'test', 'test message');
             result.pass.then(function (passvalue) {
                 expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false');
-                expect(result.message).toBe(custom_error_message, "Expected message to equal custom error message");
-                expect(elem.browser_.wait).toHaveBeenCalledTimes(1);
-                expect(elem.browser_.wait.calls.argsFor(0)[1]).toBe(3000, "Wait function should be called with default timeout - 3000");
+                expect(result.message).toBe('test message');
                 done();
             });
         });
-        // TODO: Tottaly not ready, even names are copypasted and nothing changed
-        xit('should return {pass: Promise<false>, message:string} for visible element, when timeout and error message is specified', function (done) {
+        it('should return {pass: Promise<false>, message:string} for element without specified class, when timeout and error message is specified', function (done) {
             var elem = new VisibleElement();
             var custom_timeout = 1000;
-            var custom_error_message = 'custom error message';
             spyOn(elem.browser_, 'wait').and.callThrough(); // To detect what timeout was used
-            var result = toDisappear.compare(elem, custom_timeout, custom_error_message);
+            elem.setAttribute('class', 'nonexist');
+            var result = toHaveClass.compare(elem, 'test', custom_timeout, 'test message');
             result.pass.then(function (passvalue) {
                 expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false');
-                expect(result.message).toBe(custom_error_message, "Expected message to equal custom error message");
+                expect(result.message).toBe('test message');
+                // Asserting only one call was done. In actual code this also will be once
                 expect(elem.browser_.wait).toHaveBeenCalledTimes(1);
                 expect(elem.browser_.wait.calls.argsFor(0)[1]).toBe(custom_timeout, "Wait function should be called with custom timeout - " + custom_timeout);
                 done();
             });
         });
-        xdescribe('with .not', function () {
-            // TODO: Tottaly not ready, even names are copypasted and nothing changed
-            xit('should return {pass: Promise<true>} for visible element', function (done) {
-                var result = toDisappear.negativeCompare(new VisibleElement());
+        describe('with .not', function () {
+            it('should have required className argument, and throw error if not passed', function () {
+                var wrapped = function () { return toHaveClass.negativeCompare(new VisibleElement(), undefined); };
+                expect(wrapped).toThrowError("parameter 'className' waiting for String argument but received Undefined");
+            });
+            it('should return {pass: Promise<true>} for element without specified class', function (done) {
+                var elem = new VisibleElement();
+                elem.setAttribute('class', 'test');
+                var result = toHaveClass.negativeCompare(elem, 'nonexist');
                 result.pass.then(function (passvalue) {
                     expect(passvalue).toBeTruthy('Expected result.pass to be resolved to true');
                     expect(result.message).toBe(undefined, 'Expected result.message not to be defined when success');
                     done();
                 });
             });
-            xit('should return {pass: Promise<false>, message:string} for non-visible element', function (done) {
+            it('should return {pass: Promise<false>, message:string} for element with specified class', function (done) {
                 var elem = new VisibleElement();
-                var result = toDisappear.negativeCompare(elem);
+                elem.setAttribute('class', 'test');
+                var result = toHaveClass.negativeCompare(elem, 'test');
                 result.pass.then(function (passvalue) {
                     expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false');
-                    expect(result.message).toBe("Element " + elem.locator() + " was expected to be shown in 3000 milliseconds but is NOT visible", "Expected message to equal default message");
+                    expect(result.message).toBe("Element " + elem.locator() + " was expected NOT to have class \"test\" in 3000 milliseconds, but it does");
                     done();
                 });
             });
-            xit('should return {pass: Promise<false>, message:string} for non-visible element, when timeout is specified', function (done) {
+            it('should return {pass: Promise<false>, message:string} for element with specified class, when timeout specified', function (done) {
                 var elem = new VisibleElement();
                 var custom_timeout = 1000;
                 spyOn(elem.browser_, 'wait').and.callThrough(); // To detect what timeout was used
-                var result = toDisappear.negativeCompare(elem, custom_timeout);
+                elem.setAttribute('class', 'test');
+                var result = toHaveClass.negativeCompare(elem, 'test', custom_timeout);
                 result.pass.then(function (passvalue) {
                     expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false');
-                    expect(result.message).toBe("Element " + elem.locator() + " was expected to be shown in " + custom_timeout + " milliseconds but is NOT visible", "Expected message to equal default message");
+                    expect(result.message).toBe("Element " + elem.locator() + " was expected NOT to have class \"test\" in " + custom_timeout + " milliseconds, but it does");
                     // Asserting only one call was done. In actual code this also will be once
                     expect(elem.browser_.wait).toHaveBeenCalledTimes(1);
                     expect(elem.browser_.wait.calls.argsFor(0)[1]).toBe(custom_timeout, "Wait function should be called with custom timeout - " + custom_timeout);
                     done();
                 });
             });
-            xit('should return {pass: Promise<false>, message:string} for non-visible element, when error message is specified', function (done) {
+            it('should return {pass: Promise<false>, message:string} for element with specified class, when error message is specified', function (done) {
                 var elem = new VisibleElement();
-                var custom_error_message = 'custom error message';
-                spyOn(elem.browser_, 'wait').and.callThrough(); // To detect what timeout was used
-                var result = toDisappear.negativeCompare(elem, custom_error_message);
+                elem.setAttribute('class', 'test');
+                var result = toHaveClass.negativeCompare(elem, 'test', 'test message');
                 result.pass.then(function (passvalue) {
                     expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false');
-                    expect(result.message).toBe(custom_error_message, "Expected message to equal custom error message");
-                    expect(elem.browser_.wait).toHaveBeenCalledTimes(1);
-                    expect(elem.browser_.wait.calls.argsFor(0)[1]).toBe(3000, "Wait function should be called with default timeout - 3000");
+                    expect(result.message).toBe('test message');
                     done();
                 });
             });
-            xit('should return {pass: Promise<false>, message:string} for non-visible element, when timeout and error message is specified', function (done) {
+            it('should return {pass: Promise<false>, message:string} for element with specified class, when timeout and error message is specified', function (done) {
                 var elem = new VisibleElement();
                 var custom_timeout = 1000;
-                var custom_error_message = 'custom error message';
                 spyOn(elem.browser_, 'wait').and.callThrough(); // To detect what timeout was used
-                var result = toDisappear.negativeCompare(elem, custom_timeout, custom_error_message);
+                elem.setAttribute('class', 'test');
+                var result = toHaveClass.negativeCompare(elem, 'test', custom_timeout, 'test message');
                 result.pass.then(function (passvalue) {
                     expect(passvalue).toBeFalsy('Expected result.pass to be resolved to false');
-                    expect(result.message).toBe(custom_error_message, "Expected message to equal custom error message");
+                    expect(result.message).toBe('test message');
+                    // Asserting only one call was done. In actual code this also will be once
                     expect(elem.browser_.wait).toHaveBeenCalledTimes(1);
                     expect(elem.browser_.wait.calls.argsFor(0)[1]).toBe(custom_timeout, "Wait function should be called with custom timeout - " + custom_timeout);
                     done();

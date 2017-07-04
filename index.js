@@ -57,7 +57,8 @@ var Helpers = (function () {
     function Helpers() {
     }
     Helpers.hasClass = function (elem, classString) {
-        return elem.getAttribute('class').then(function (classes) {
+        var classatr = elem.getAttribute('class');
+        return classatr.then(function (classes) {
             // splitting to avoid false positive 'inactiveGrayed inactive'.indexOf('active') !== -1
             var classesArr = classes.split(' ');
             return classesArr.indexOf(classString) !== -1;
@@ -161,7 +162,7 @@ exports["default"] = {
             };
             result.pass = argsObj.browsr.wait(function () { return Helpers.hasClass(argsObj.elem, argsObj.className); }, argsObj.timeout)
                 .then(function () { return true; }, function (err) {
-                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected to have class " + argsObj.className + " in " + argsObj.timeout + ", but it doesnt";
+                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected to have class \"" + argsObj.className + "\" in " + argsObj.timeout + " milliseconds, but it doesnt";
                 return false;
             });
             return result;
@@ -173,7 +174,7 @@ exports["default"] = {
             };
             result.pass = argsObj.browsr.wait(function () { return Helpers.hasNoClass(argsObj.elem, argsObj.className); }, argsObj.timeout)
                 .then(function () { return true; }, function (err) {
-                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected NOT to have class " + argsObj.className + " in " + argsObj.timeout + ", but it does";
+                result.message = argsObj.message || "Element " + argsObj.elem.locator() + " was expected NOT to have class \"" + argsObj.className + "\" in " + argsObj.timeout + " milliseconds, but it does";
                 return false;
             });
             return result;
