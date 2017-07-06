@@ -186,5 +186,7 @@ var Matchers = (function () {
     return Matchers;
 }());
 //////////////////////// EXPORT ////////////////////////
-// Exporting matchers in format that applicable for Jasminejs to import.
+// Had to switch back to `let matchers = require('jasmine-protractor-matchers')`
+// due to default ES6 exports that wrapp everything into 'default' key. 
+// TODO: Fix exports to support ES6 import matchers from 'jasmine-protractor-matchers'
 module.exports = new Matchers();

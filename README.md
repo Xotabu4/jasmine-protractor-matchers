@@ -13,6 +13,7 @@ NodeJS:
 - 5.x
 - 6.x
 - 7.x
+- 8.x
 
 ProtractorJS:
 - 3.x
@@ -103,10 +104,59 @@ it('test 2', function () {
 List of matchers
 ----------------
 
-* .toAppear(opt_ms_timeout, opt_customMessage) - waits for element to be present and visible
-* .toDisappear(opt_ms_timeout, opt_customMessage) - waits for element to be invisible
+#### toAppear
+`toAppear(timeout?: number, custom_error_message?: string): boolean;`
 
-more will be added each 10 stars :)
+Matcher for asserting that element is present and visible.
+Should be applied to ElementFinder object only.
+         
+`@param {number} timeout` Timeout to wait for appear of element in milliseconds. Default is 3000 milliseconds
+
+`@param {string} custom_error_message` Custom error message to throw on assertion failure. Default message is - `Element ELEMENT_LOCATOR was expected to be shown in TIMEOUT milliseconds but is NOT visible`
+         
+##### Example
+```javascript
+expect($('body')).toAppear()
+expect($('body')).toAppear(5000) // Will wait for 5 seconds for element to be visible
+expect($('body')).toAppear('body element should appear!') // Will wait for 3 seconds for element to be displayed, and throw your custom error message if not
+```
+
+------------------
+#### toDisappear
+`toDisappear(timeout?: number, custom_error_message?: string): boolean;`
+
+Matcher for asserting that element is not visible on the page.
+Should be applied to ElementFinder object only.
+         
+`@param {number} timeout` Timeout to wait for to disappear of element in milliseconds. Default is 3000 milliseconds
+
+`@param {string} custom_error_message` Custom error message to throw on assertion failure. Default message is - `Element ELEMENT_LOCATOR was expected NOT to be shown in TIMEOUT milliseconds but is visible`
+         
+##### Example
+```javascript
+expect($('.popup')).toDisappear()
+expect($('.popup')).toDisappear(5000) // Will wait for 5 seconds for element to be visible
+expect($('.popup')).toDisappear('body element should appear!') // Will wait for 3 seconds for element to be displayed, and throw your custom error message if not
+```
+
+
+------------------
+#### toHaveClass
+`toDisappear(timeout?: number, custom_error_message?: string): boolean;`
+
+Matcher for asserting that element class attribute has specified class name. For example - we have element `<div class='hello worlds'></div>`
+Should be applied to ElementFinder object only.
+         
+`@param {number} timeout` Timeout to wait for to disappear of element in milliseconds. Default is 3000 milliseconds
+
+`@param {string} custom_error_message` Custom error message to throw on assertion failure. Default message is - `Element ELEMENT_LOCATOR was expected NOT to be shown in TIMEOUT milliseconds but is visible`
+         
+##### Example
+```javascript
+expect($('.popup')).toHaveClass()
+expect($('.popup')).toHaveClass(5000) // Will wait for 5 seconds for element to be visible
+expect($('.popup')).toHaveClass('body element should appear!') // Will wait for 3 seconds for element to be displayed, and throw your custom error message if not
+```
 
 Used documentation
 ------------------
@@ -115,3 +165,5 @@ http://jasmine.github.io/edge/custom_matcher.html
 https://angular.github.io/protractor/#/api?view=webdriver.WebDriver.prototype.wait
 
 https://angular.github.io/protractor/#/api?view=ExpectedConditions
+
+https://github.com/zvictor/ArgueJS
