@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "target": "es3",
+        "module": "commonjs",
+        "outDir": "built/"
+    },
+    "exclude": [
+        "node_modules/"
+    ],
+    "lib": [
+        "es2015"
+    ]
+}

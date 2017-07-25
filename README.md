@@ -13,6 +13,7 @@ NodeJS:
 - 5.x
 - 6.x
 - 7.x
+- 8.x
 
 ProtractorJS:
 - 3.x
@@ -30,7 +31,7 @@ npm install jasmine-protractor-matchers --save-dev
 
 Importing and enabling
 ---------------------
-I prefer to add matchers in beforeEach function, that I put into onPrepare:
+I prefer to add matchers in `beforeEach` function, that I put into `onPrepare`:
 
 In your protractor.config.js:
 ```javascript
@@ -59,22 +60,19 @@ describe('Some test suite', function () {
 
 #### TypeScript
 
-To import matchers - use approach with `require` as in JS:
+To import matchers - use this format `import macthers = require('jasmine-protractor-matchers');`:
+
+Add to jasmine somewhere:
+
 ```typescript
-onPrepare: function() {
-    var protractorMatchers = require('jasmine-protractor-matchers');
-    beforeAll(function() {
-        jasmine.addMatchers(protractorMatchers);
+onPrepare: ()=> {
+    import macthers = require('jasmine-protractor-matchers')
+    beforeEach(()=> {
+        jasmine.addMatchers(macthers)
         //Some code that needs to be executed before all tests only once.
-    });
+    })
 ```
-
-But in jasmine spec files where you want to use this matchers, you must add this line to the top of the file:
-```xml
-/// <reference types="jasmine-protractor-matchers" />
-```
-
-This needs to be done to let TypeScript know that we have extended jasmine module with additional matchers. Now you should see aditional suggestions in autocomplete, and typings support.
+Now TypeScript compiler will know that we have extended jasmine module with additional matchers. 
 
 
 Usage
@@ -103,10 +101,75 @@ it('test 2', function () {
 List of matchers
 ----------------
 
-* .toAppear(opt_ms_timeout, opt_customMessage) - waits for element to be present and visible
-* .toDisappear(opt_ms_timeout, opt_customMessage) - waits for element to be invisible
+#### toAppear
+`toAppear(timeout?: number, custom_error_message?: string): boolean;`
 
-more will be added each 10 stars :)
+Matcher for asserting that element is present and visible.
+Should be applied to ElementFinder object only.
+         
+`@param {number} timeout` Timeout to wait for appear of element in milliseconds. Default is 3000 milliseconds
+
+`@param {string} custom_error_message` Custom error message to throw on assertion failure. Default message is - `Element ELEMENT_LOCATOR was expected to be shown in TIMEOUT milliseconds but is NOT visible`
+         
+##### Example
+```javascript
+expect($('body')).toAppear()
+expect($('body')).toAppear(5000) // Will wait for 5 seconds for element to be visible
+expect($('body')).toAppear('body element should appear!') // Will wait for 3 seconds for element to be displayed, and throw your custom error message if not
+
+expect($('.popup')).not.toAppear()  // Same as maching with .toDisappear()
+```
+
+------------------
+#### toDisappear
+`toDisappear(timeout?: number, custom_error_message?: string): boolean;`
+
+Matcher for asserting that element is not visible on the page.
+Should be applied to ElementFinder object only.
+         
+`@param {number} timeout` Timeout to wait for to disappear of element in milliseconds. Default is 3000 milliseconds
+
+`@param {string} custom_error_message` Custom error message to throw on assertion failure. Default message is - `Element ELEMENT_LOCATOR was expected NOT to be shown in TIMEOUT milliseconds but is visible`
+         
+##### Example
+```javascript
+expect($('.popup')).toDisappear()
+expect($('.popup')).toDisappear(5000) // Will wait for 5 seconds for element to be visible
+expect($('.popup')).toDisappear('body element should appear!') // Will wait for 3 seconds for element to be displayed, and throw your custom error message if not
+
+expect($('body')).not.toDisappear() // Same as maching with .toAppear()
+```
+
+
+------------------
+#### toHaveClass
+`toHaveClass(classname:string, timeout?: number, custom_error_message?: string): boolean;`
+
+Matcher for asserting that element class attribute has specified class name. Does not require element to be present or displayed - this states won't throw exceptions, only wait timeout can happen if element not present.
+
+Should be applied to ElementFinder object only.
+
+`@param {string} classname` Class name to assert in attribute 'class'. Required.
+
+`@param {number} timeout` Timeout to wait for to disappear of element in milliseconds. Default is 3000 milliseconds
+
+`@param {string} custom_error_message` Custom error message to throw on assertion failure. Default message is - `Element ${argsObj.elem.locator()} was expected to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it doesnt`
+         
+##### Example
+For example - we have elementFinder for webelement `<div #niceelement class='hello worlds active'></div>`
+
+```typescript
+let someMustBeClass:string = 'hello'
+expect($('#niceelement')).toHaveClass(someMustBeClass)
+expect($('#niceelement')).toHaveClass(someMustBeClass, 5000) // Will wait for 5 seconds for element to be visible
+expect($('#niceelement')).toHaveClass(someMustBeClass, `Our nice element should have class ${someMustBeClass}`) // Will wait for 3 seconds for element to have class, and throw your custom error message if not
+
+expect($('#niceelement')).not.toHaveClass('inactive', `Our nice element should not be inactive`)
+```
+
+### Your feedbacks helps me!
+Please don't be shy to give a star, create a bug, or feature\pull request!
+
 
 Used documentation
 ------------------
@@ -115,3 +178,5 @@ http://jasmine.github.io/edge/custom_matcher.html
 https://angular.github.io/protractor/#/api?view=webdriver.WebDriver.prototype.wait
 
 https://angular.github.io/protractor/#/api?view=ExpectedConditions
+
+https://github.com/zvictor/ArgueJS
