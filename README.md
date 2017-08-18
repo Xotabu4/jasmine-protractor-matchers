@@ -60,16 +60,16 @@ describe('Some test suite', function () {
 
 #### TypeScript
 
-To import matchers - use this format `import macthers = require('jasmine-protractor-matchers');`:
+To import matchers - use this format `import matchers = require('jasmine-protractor-matchers');`:
 
 Add to jasmine somewhere:
 
 ```typescript
 onPrepare: ()=> {
-    import macthers = require('jasmine-protractor-matchers')
+    import matchers = require('jasmine-protractor-matchers')
     beforeEach(()=> {
-        jasmine.addMatchers(macthers)
-        //Some code that needs to be executed before all tests only once.
+        jasmine.addMatchers(matchers)
+        //Some code that needs to be executed before every test.
     })
 ```
 Now TypeScript compiler will know that we have extended jasmine module with additional matchers. 
