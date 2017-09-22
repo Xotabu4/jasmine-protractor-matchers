@@ -71,6 +71,19 @@ class Matcher {
     }
 }
 class Helpers {
+    static containsAttributeValue(elem: IElementFinder, attributeName: string, expectedValue: string) {
+        let attributeValue = elem.getAttribute(attributeName)
+        return attributeValue.then(atrValue => {
+            return atrValue.indexOf(expectedValue) !== -1
+        }, err => {
+            return false
+        })
+    }
+
+    static containsNoAttributeValue(elem: IElementFinder, attributeName: string, expectedValue: string) {
+        return Helpers.containsAttributeValue(elem, attributeName, expectedValue).then(res => !res)
+    }
+
     static hasClass(elem: IElementFinder, classString: string) {
         let classatr = elem.getAttribute('class')
         return classatr.then(classes => {
@@ -209,6 +222,50 @@ class Matchers {
                     .then(() => true,
                     err => {
                         result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected NOT to have class "${argsObj.className}" in ${argsObj.timeout} milliseconds, but it does`
+                        return false
+                    })
+                return result
+            }
+        }).build()
+    }
+
+    /**
+     * Matcher for asserting that element attribute includes specified value
+     *
+     * Should be applied to ElementFinder object only.
+     * 
+     * attribute - Required, attribute name for element
+     * className - Required, attribute value to include
+     * [timeout=3000] - Timeout to wait for class name to appear in class attribute in milliseconds.
+     * [message='``Element ${argsObj.elem.locator()} was expected atribute "${argsObj.attribute}" to contain "${argsObj.value}" in ${argsObj.timeout} milliseconds, but it doesnt``'] Custom error message to throw on assertion failure.
+     */
+    toContainAttributeValue() {
+        return new Matcher({
+            argumentsSignature: { elem: Object, browsr: Object, attribute: String, value: String, timeout: [Number, 3000], message: [String] },
+            compareFunc: (argsObj) => {
+                let result: CustomMatcherResultPromised = {
+                    pass: undefined,
+                    message: undefined
+                }
+
+                result.pass = argsObj.browsr.wait(() => Helpers.containsAttributeValue(argsObj.elem, argsObj.attribute, argsObj.value), argsObj.timeout)
+                    .then(() => true,
+                    err => {
+                        result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected atribute "${argsObj.attribute}" to contain "${argsObj.value}" in ${argsObj.timeout} milliseconds, but it doesnt`
+                        return false
+                    })
+                return result
+            },
+            negativeCompareFunc: (argsObj) => {
+                let result: CustomMatcherResultPromised = {
+                    pass: undefined,
+                    message: undefined
+                }
+
+                result.pass = argsObj.browsr.wait(() => Helpers.containsNoAttributeValue(argsObj.elem, argsObj.attribute, argsObj.value), argsObj.timeout)
+                    .then(() => true,
+                    err => {
+                        result.message = argsObj.message || `Element ${argsObj.elem.locator()} was expected atribute "${argsObj.attribute}" NOT to contain "${argsObj.value}" in ${argsObj.timeout} milliseconds, but it doesnt`
                         return false
                     })
                 return result
