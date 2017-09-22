@@ -65,8 +65,10 @@ To import matchers - use this format `import matchers = require('jasmine-protrac
 Add to jasmine somewhere:
 
 ```typescript
+// On top of file:
+import matchers = require('jasmine-protractor-matchers')
+
 onPrepare: ()=> {
-    import matchers = require('jasmine-protractor-matchers')
     beforeEach(()=> {
         jasmine.addMatchers(matchers)
         //Some code that needs to be executed before every test.
