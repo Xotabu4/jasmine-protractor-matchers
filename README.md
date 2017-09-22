@@ -100,6 +100,17 @@ it('test 2', function () {
 });
 ```
 
+#### ASYNC/AWAIT support
+If you disabled Promise manager (Control Flow), and you use async/await, just put await for your `expect` call:
+
+```javascript
+it('async/await', async function () {
+    await browser.get('http://www.myangularapplication.com');
+    await expect($('html')).toAppear(); 
+});
+
+```
+
 List of matchers
 ----------------
 
