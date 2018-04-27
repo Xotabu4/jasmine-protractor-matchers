@@ -14,6 +14,7 @@ NodeJS:
 - 6.x
 - 7.x
 - 8.x
+- 9.x
 
 ProtractorJS:
 - 3.x
