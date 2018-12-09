@@ -15,11 +15,14 @@ NodeJS:
 - 7.x
 - 8.x
 - 9.x
+- 10.x
 
 ProtractorJS:
 - 3.x
 - 4.x
 - 5.x
+
+Jasmine 3.x is not supported yet. PRs are welcome!
 
 Typings for TypeScript are included
 
