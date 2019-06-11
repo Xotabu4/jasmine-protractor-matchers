@@ -1,5 +1,5 @@
 var argumentsToObject = require('arguejs'); // Nice! https://github.com/zvictor/ArgueJS
-var Matcher = (function () {
+var Matcher = /** @class */ (function () {
     function Matcher(options) {
         this.options = options;
     }
@@ -50,7 +50,7 @@ var Matcher = (function () {
     };
     return Matcher;
 }());
-var Helpers = (function () {
+var Helpers = /** @class */ (function () {
     function Helpers() {
     }
     Helpers.hasClass = function (elem, classString) {
@@ -68,7 +68,7 @@ var Helpers = (function () {
     };
     return Helpers;
 }());
-var Matchers = (function () {
+var Matchers = /** @class */ (function () {
     function Matchers() {
     }
     /**
