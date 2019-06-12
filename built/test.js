@@ -17,7 +17,7 @@ var jasmineRunner = new Jasmine();
 var matchers = require('./index');
 //////////////////////// MOCKS ////////////////////////
 // TODO: Move mocks to separate file
-var MockedBrowser = (function () {
+var MockedBrowser = /** @class */ (function () {
     function MockedBrowser() {
         this.ExpectedConditions = {
             visibilityOf: function (elem) { return function () { return elem.isDisplayed(); }; },
@@ -46,7 +46,7 @@ var MockedBrowser = (function () {
     };
     return MockedBrowser;
 }());
-var WebElement = (function () {
+var WebElement = /** @class */ (function () {
     function WebElement() {
         var _this = this;
         this.attributes = {};
@@ -70,7 +70,7 @@ var WebElement = (function () {
     };
     return WebElement;
 }());
-var Protractor3WebElement = (function (_super) {
+var Protractor3WebElement = /** @class */ (function (_super) {
     __extends(Protractor3WebElement, _super);
     function Protractor3WebElement() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -80,7 +80,7 @@ var Protractor3WebElement = (function (_super) {
     }
     return Protractor3WebElement;
 }(WebElement));
-var Protractor4WebElement = (function (_super) {
+var Protractor4WebElement = /** @class */ (function (_super) {
     __extends(Protractor4WebElement, _super);
     function Protractor4WebElement() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -90,7 +90,7 @@ var Protractor4WebElement = (function (_super) {
     }
     return Protractor4WebElement;
 }(WebElement));
-var VisibleElement = (function (_super) {
+var VisibleElement = /** @class */ (function (_super) {
     __extends(VisibleElement, _super);
     function VisibleElement() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
@@ -99,7 +99,7 @@ var VisibleElement = (function (_super) {
     }
     return VisibleElement;
 }(Protractor4WebElement));
-var NonVisibleElement = (function (_super) {
+var NonVisibleElement = /** @class */ (function (_super) {
     __extends(NonVisibleElement, _super);
     function NonVisibleElement() {
         var _this = _super !== null && _super.apply(this, arguments) || this;

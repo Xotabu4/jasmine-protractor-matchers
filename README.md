@@ -16,13 +16,15 @@ NodeJS:
 - 8.x
 - 9.x
 - 10.x
+- 11.x
+- 12.x
 
 ProtractorJS:
 - 3.x
 - 4.x
 - 5.x
 
-Jasmine 3.x is not supported yet. PRs are welcome!
+Jasmine 3.x and Protractor 6.x is not supported yet. PRs are welcome!
 
 Typings for TypeScript are included
 
@@ -184,7 +186,7 @@ expect($('#niceelement')).toHaveClass(someMustBeClass, `Our nice element should 
 expect($('#niceelement')).not.toHaveClass('inactive', `Our nice element should not be inactive`)
 ```
 
-### Your feedbacks helps me!
+### Your feedback is important!
 Please don't be shy to give a star, create a bug, or feature\pull request!
 
 
