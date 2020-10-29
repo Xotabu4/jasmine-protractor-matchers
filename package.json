@@ -1,6 +1,6 @@
 {
   "name": "jasmine-protractor-matchers",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Collection of additional jasmine matchers, that is useful for those who develop e2e tests using protractor",
   "main": "./built/index.js",
   "scripts": {

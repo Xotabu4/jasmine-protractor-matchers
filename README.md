@@ -9,22 +9,17 @@ Supported versions
 ---------------------
 Currently tested on 
 NodeJS:
-- 4.x
-- 5.x
-- 6.x
-- 7.x
-- 8.x
-- 9.x
-- 10.x
-- 11.x
 - 12.x
+- 14.x
 
 ProtractorJS:
-- 3.x
-- 4.x
 - 5.x
+- 7.x
 
-Jasmine 3.x and Protractor 6.x is not supported yet. PRs are welcome!
+Jasmine 3.x not supported yet. 
+Protractor 6.x is deprecated and won't be supported
+
+PRs are welcome!
 
 Typings for TypeScript are included
 
