@@ -1,3 +1,7 @@
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
+# This library is deprecated and won't be updated in future, since protractor support is ending as well: https://github.com/angular/protractor/issues/5502
+
 JasmineJS matchers for ProtractorJS
 ===================================
 [![Build Status](https://travis-ci.org/Xotabu4/jasmine-protractor-matchers.svg?branch=master)](https://travis-ci.org/Xotabu4/jasmine-protractor-matchers)[![npm version](https://badge.fury.io/js/jasmine-protractor-matchers.svg)](https://badge.fury.io/js/jasmine-protractor-matchers)
